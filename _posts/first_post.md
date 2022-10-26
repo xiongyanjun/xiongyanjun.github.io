@@ -1,4 +1,4 @@
-##first_post_page
+## first_post_page
 
 
-![这是图片](philly-magic-garden.jpg "Magic Gardens")
+![这是图片](https://markdown.com.cn/assets/img/philly-magic-garden.9c0b4415.jpg "Magic Gardens")
