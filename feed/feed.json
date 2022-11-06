@@ -1,0 +1,56 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "Cute Blog 🥳",
+  "language": "en",
+  "home_page_url": "https://cuteblog.pages.dev/",
+  "feed_url": "https://cuteblog.pages.dev/feed/feed.json",
+  "description": "New Free template download gratis cuteblog for eleventy 11ty",
+  "author": {
+    "name": "axcora",
+    "url": "https://website.axcora.com"
+  },
+  "items": [{
+      "id": "https://cuteblog.pages.dev/posts/welcome/",
+      "url": "https://cuteblog.pages.dev/posts/welcome/",
+      "title": "Welcome",
+      "content_html": "<p>Welcome to cuteblog template for eleventy 11ty.</p>\n<p>this is a free and open source code for develope and build modern blog or website using generator static site.</p>\n<p>what a special with eleventy is because 11ty very fast stable and powerfull on SEO.</p>\n<hr>\n<p>How to install ??<br>\nFor first of course we need to download node js, so you can <a href=\"https://nodejs.org/en/download/\">download node →</a></p>\n<p>then you can download cuteblog 11ty source code.</p>\n<p>or clone repo with run <code>git clone </code></p>\n<p>open sourcecode project and run <code>npm install</code></p>\n<p>now you can deploy on your server with run <code>npm start</code></p>\n<p>open web browser and visit on localhost:8080</p>\n<hr>\n<p>Work with cuteblog 11ty</p>\n<p>for first you an open _data folder then edit <code>metadata.json</code> change title , description ,url and other for your website and blog.</p>\n<p>now for create and edit update or delete post article you can visit on posts folder, create new md files and write your article in here. you can copy and paste sample article in here then edit with you needed.</p>\n<hr>\n<p>Deploy cuteblog on hosting</p>\n<p>for first you can run <code>npm run build</code> or <code>npm build</code> then you can deploy <code>_site folder</code> on static hosting like surge or firbease.</p>\n<p>For simple deploy you can push your project on github repo then create project on netlify, vercel or heroku and integrated with your repo project . now your cuteblog project is live.</p>\n",
+      "date_published": "2022-04-22T00:00:00Z"
+    },{
+      "id": "https://cuteblog.pages.dev/posts/blogging/",
+      "url": "https://cuteblog.pages.dev/posts/blogging/",
+      "title": "Blogging",
+      "content_html": "<p>Cuteblog is present by <a href=\"https://website.axcora.com\">axcora technology</a> for blogger.</p>\n<p>with this template project you just need to focusing on content post article , this is because we have generate auto meta title , description and social card automaticly , with using <a href=\"https://11ty.dev\">eleventy 11ty</a> make your blog and site super fast and powerfull on SEO.</p>\n",
+      "date_published": "2022-04-21T00:00:00Z"
+    },{
+      "id": "https://cuteblog.pages.dev/posts/source/",
+      "url": "https://cuteblog.pages.dev/posts/source/",
+      "title": "Source",
+      "content_html": "<p>All source code project we have develope special for <a href=\"https://11ty.dev\">eleventy 11ty</a> lovers. click and download this starter template project on our github repo. don't forget to click star</p>\n<ul>\n<li><a href=\"https://github.com/mesinkasir/eleventyblog\">bootstrap11ty download →</a> or <a href=\"https://eleventyblog.vercel.app/\">bootstrap11ty demo →</a></li>\n<li><a href=\"https://github.com/mesinkasir/text11ty\">text11ty download →</a> or <a href=\"https://text11ty.pages.dev/\">text11ty demo →</a></li>\n<li><a href=\"https://github.com/mesinkasir/mobile11ty\">mobile11ty download →</a> or <a href=\"https://mobile11ty.pages.dev/\">mobile11ty demo →</a></li>\n<li><a href=\"https://github.com/mesinkasir/thisis-11ty\">thisis 11ty download →</a> or <a href=\"https://thisis11ty.netlify.app/\">thisis11ty run demo →</a></li>\n</ul>\n<p>others 11ty project premium</p>\n<ul>\n<li><a href=\"https://tokorak.web.app/\">complete company profile 11ty →</a></li>\n<li><a href=\"https://raktoko.web.app/\">company profile 11ty →</a></li>\n<li><a href=\"https://eleventy.web.app/\">developer11ty →</a></li>\n<li><a href=\"https://bootstrap11ty.pages.dev/\">portfolio 11ty # →</a></li>\n<li><a href=\"https://programrestoran.web.app/\">blog 11ty # →</a></li>\n</ul>\n",
+      "date_published": "2022-04-20T00:00:00Z"
+    },{
+      "id": "https://cuteblog.pages.dev/posts/pico/",
+      "url": "https://cuteblog.pages.dev/posts/pico/",
+      "title": "Pico",
+      "content_html": "<p>Cuteblog for <a href=\"https://picocms.org\">pico cms</a></p>\n<p>Yess.. we have develope new modern cute blog for pico cms including admin backend area, so you can download it and install now, visit this link</p>\n<p><a href=\"https://axcora.my.id/pico/cuteblog/\">https://axcora.my.id/pico/cuteblog →</a></p>\n<p>visit home page :</p>\n<ul>\n<li><a href=\"https://cuteblog.web.app/\">https://cuteblog.web.app/</a></li>\n<li><a href=\"https://cuteblog.firebaseapp.com/\">https://cuteblog.firebaseapp.com/</a></li>\n</ul>\n<p>documentation :</p>\n<ul>\n<li><a href=\"https://www.hockeycomputindo.com/2022/04/cute-blog-astro-generator-static-site.html\">https://www.hockeycomputindo.com/2022/04/cute-blog-astro-generator-static-site.html</a></li>\n</ul>\n",
+      "date_published": "2022-04-17T00:00:00Z"
+    },{
+      "id": "https://cuteblog.pages.dev/posts/jekyll/",
+      "url": "https://cuteblog.pages.dev/posts/jekyll/",
+      "title": "Jekyll",
+      "content_html": "<p>Cuteblog for <a href=\"https://jekyllrb.com\">jekyll</a> is finished and you can download it , if you need build cuteblog using jekyll rb.</p>\n<ul>\n<li><a href=\"https://www.hockeycomputindo.com/2022/04/auto-seo-dengan-cuteblog-for-jekyll.html\">Download and documentation →</a></li>\n<li><a href=\"https://mesinkasir.github.io/cuteblog-jekyll/\">test drive demo →</a></li>\n</ul>\n<p>visit home page :</p>\n<ul>\n<li><a href=\"https://cuteblog.web.app/\">https://cuteblog.web.app/</a></li>\n<li><a href=\"https://cuteblog.firebaseapp.com/\">https://cuteblog.firebaseapp.com/</a></li>\n</ul>\n",
+      "date_published": "2022-04-17T00:00:00Z"
+    },{
+      "id": "https://cuteblog.pages.dev/posts/astro/",
+      "url": "https://cuteblog.pages.dev/posts/astro/",
+      "title": "Astro",
+      "content_html": "<p>We have develope first cuteblog source code project with <a href=\"https://astro.build\">astro</a> new generator static site modern.</p>\n<p>visit or test demo <a href=\"https://cuteblog.netlify.app/\">https://cuteblog.netlify.app →</a></p>\n<p><a href=\"https://github.com/mesinkasir/astro-website-template-themes-source-code-download\">download cuteblog for astro →</a></p>\n",
+      "date_published": "2022-04-17T00:00:00Z"
+    },{
+      "id": "https://cuteblog.pages.dev/posts/others/",
+      "url": "https://cuteblog.pages.dev/posts/others/",
+      "title": "Others",
+      "content_html": "<p>Hey you can request cute blog for other technology and content management sytem.</p>\n<p>and other project on progress</p>\n<ul>\n<li><a href=\"https://mesinkasir.github.io/cuteblog-jekyll/\">cuteblog for jekyll →</a></li>\n<li><a href=\"https://cuteblog.vercel.app/\">cuteblog for react →</a></li>\n<li><a href=\"https://axcora.my.id/pico/cuteblog\">cuteblog for pico cms →</a></li>\n<li><a href=\"https://cuteblog.netlify.app/\">cuteblog for astro →</a></li>\n<li>cuteblog for angular</li>\n<li>cuteblog for symfony</li>\n<li>cuteblog for django</li>\n<li>cuteblog for flask</li>\n<li>cuteblog for get axcora cms</li>\n<li>cuteblog for gatsby</li>\n</ul>\n<p>stay tuned...</p>\n<p>visit our cuteblog home page</p>\n<ul>\n<li><a href=\"https://axcora.my.id/pico/cuteblog/\">https://axcora.my.id/pico/cuteblog/</a></li>\n<li><a href=\"https://cuteblog.web.app/\">https://cuteblog.web.app/</a></li>\n<li><a href=\"https://cuteblog.firebaseapp.com/\">https://cuteblog.firebaseapp.com/</a></li>\n</ul>\n",
+      "date_published": "2022-04-16T00:00:00Z"
+    }
+  ]
+}
