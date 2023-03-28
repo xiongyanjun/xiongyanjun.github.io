@@ -1,78 +1,206 @@
+<!DOCTYPE html>
 <html>
 
 <head>
-    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <title>聊天对话窗口</title>
+    <!-- 引入Bootstrap和Font Awesome的CSS文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .chatbox {
+            height: 100%;
+            margin: 50px auto;
+            padding: 10px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .message .user {
+            font-weight: bold;
+        }
+
+        .message .time {
+            font-size: 0.8rem;
+            color: #999;
+            margin-left: 10px;
+        }
+
+        .inputbox {
+            margin-top: 10px;
+        }
+
+        .inputbox input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        .inputbox .btn {
+            margin-top: 10px;
+        }
+
+        /* 自定义样式 */
+        .bg-light-gray {
+            background-color: #f8f9fa;
+        }
+
+        .loading {
+			display: flex;
+			background-color: #f5f5f5;
+		}
+		
+		.dot {
+			margin: 0 10px;
+			width: 10px;
+			height: 10px;
+			border-radius: 50%;
+			background-color: #000000;
+			animation: bounce 0.8s ease-in-out infinite;
+		}
+		
+		.dot1 {
+			animation-delay: -0.4s;
+		}
+		
+		.dot2 {
+			animation-delay: -0.2s;
+		}
+		
+		@keyframes bounce {
+			50% {
+				transform: translateY(-10px);
+			}
+		}
+    </style>
 </head>
 
 <body>
-    apiKey:<input id="apiKey" type="text">
-    <div id="chatWindow" style="width: 100%; height: 70%; background-color: bisque;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="chatbox p-3">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="apiKey"
+                            value="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">
+                        <label for="apiKey">apiKey:</label>
+                    </div>
+                    <div id="chatWindow">
+                    </div>
+                </div>
+                <div class="inputbox">
+                    <div>
+                        <input id="question" type="text" class="form-control" placeholder="输入消息...">
+                        <button id="send" class="btn btn-primary"><i class="fas fa-paper-plane"></i> 发送</button>
+                        <button id="genImage" class="btn btn-info"><i class="fas fa-images"></i> 生成图片</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    question: <input id="question" type="text" name="question">
-    <input id="send" type="submit" value="chat">
-    <input id="genImage" type="submit" value="generate image">
+    <!-- 引入Bootstrap和jQuery的JS文件 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#send").click(function () {
+                chatgpt($("#question").val())
+            });
+
+            $("#genImage").click(function () {
+                chatgptGenImage($("#question").val())
+            });
+        });
+
+        function buildDialog(name, msg, time) {
+            return `<div class=\"message bg-light-gray px-3 py-2\"><span class=\"user\">${name}:</span> ${msg}<span class=\"time\">${time}</span></div>`;
+        }
+
+        function buildImg(src) {
+            return `<img class="img-fluid" src=${src}></img>`;
+        }
+
+        const loadingDiv = `<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>`;
+
+        function chatgpt(messages) {
+            $("#chatWindow").append(buildDialog("I", messages, new Date().toLocaleString()));
+
+            chatData = {
+                "model": "gpt-3.5-turbo",
+                "messages": [{ "role": "user", "content": messages }]
+            }
+            $.ajax({
+                url: "https://api.openai.com/v1/chat/completions",
+                type: "post",
+                dataType: "json",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + $("#apiKey").val()
+                },
+                data: JSON.stringify(chatData),
+                success: function (response) {
+                    console.log(response)
+                    $("#chatWindow").children().last().remove();
+                    $("#chatWindow").append(buildDialog("chatGpt", response.choices[0].message.content, new Date().toLocaleString()));
+
+                },
+                error: function () {
+                },
+                beforeSend: function () {
+                    // Handle the beforeSend event  
+                    $("#chatWindow").append(buildDialog("chatGpt", loadingDiv, ""))
+                },
+                complete: function () {
+                    // Handle the complete event  
+                   
+                }
+            });
+        }
+
+        function chatgptGenImage(messages) {
+            $("#chatWindow").append(buildDialog("我", messages, new Date().toLocaleString()));
+            chatData = {
+                "prompt": messages,
+                "n": 2,
+                "size": "512x512"
+            }
+            $.ajax({
+                url: "https://api.openai.com/v1/images/generations",
+                type: "post",
+                dataType: "json",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + $("#apiKey").val()
+                },
+                data: JSON.stringify(chatData),
+                success: function (response) {
+                    console.log(response)
+                    $("#chatWindow").children().last().remove();
+                    response.data.forEach(element => {
+                        $("#chatWindow").append(buildDialog("chatGpt", buildImg(element.url), new Date().toLocaleString()));
+                    });
+                },
+                error: function () {
+                },
+                beforeSend: function () {
+                    // Handle the beforeSend event  
+                    $("#chatWindow").append(buildDialog("chatGpt", loadingDiv, ""))
+                },
+                complete: function () {
+                    // Handle the complete event  
+                }
+            });
+        }
+    </script>
 </body>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $("#send").click(function () {
-            chatgpt($("#question").val())
-        });
-
-        $("#genImage").click(function () {
-            chatgptGenImage($("#question").val())
-        });
-    });
-
-    function chatgpt(messages) {
-        $("#chatWindow").html($("#chatWindow").html() + "<p>I:" + messages + "</p>");
-        chatData = {
-            "model": "gpt-3.5-turbo",
-            "messages": [{ "role": "user", "content": messages }]
-        }
-        $.ajax({
-            url: "https://api.openai.com/v1/chat/completions",
-            type: "post",
-            dataType: "json",
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + $("#apiKey").val()
-            },
-            data: JSON.stringify(chatData),
-            success: function (response) {
-                console.log(response)
-                $("#chatWindow").html($("#chatWindow").html() + "<p>chatGPT:" + response.choices[0].message.content + "</p>");
-            },
-            error: function () {
-            }
-        });
-    }
-	
-    function chatgptGenImage(messages) {
-        $("#chatWindow").html($("#chatWindow").html() + "<p>I:" + messages + "</p>");
-        chatData = {
-            "prompt": messages,
-            "n": 2,
-            "size": "1024x1024"
-        }
-        $.ajax({
-            url: "https://api.openai.com/v1/images/generations",
-            type: "post",
-            dataType: "json",
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + $("#apiKey").val()
-            },
-            data: JSON.stringify(chatData),
-            success: function (response) {
-                console.log(response)
-                response.data.forEach(element => {
-                    $("#chatWindow").html($("#chatWindow").html() + "<p>chatGPT:<img src=\"" + element.url + "\"></img></p>");
-                });
-            },
-            error: function () {
-            }
-        });
-    }
-</script>
 
 </html>
