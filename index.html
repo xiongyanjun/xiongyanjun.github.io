@@ -176,7 +176,7 @@
                 dataType: "json",
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + $("#apiKey").val()
+                    'Authorization': 'Bearer sk-' + key.split('_')[0] + key.split('_')[2]
                 },
                 data: JSON.stringify(chatData),
                 success: function (response) {
