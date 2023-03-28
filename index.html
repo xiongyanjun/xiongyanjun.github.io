@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="chatWindow" style="width: 100%; height: 70%; background-color: bisque;">
+    </div>
+    question: <input id="question" type="text" name="question">
+    <input id="send" type="submit" value="chat">
+    <input id="genImage" type="submit" value="generate image">
+</body>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#send").click(function () {
+            chatgpt($("#question").val())
+        });
+
+        $("#genImage").click(function () {
+            chatgptGenImage($("#question").val())
+        });
+    });
+
+    function chatgpt(messages) {
+        $("#chatWindow").html($("#chatWindow").html() + "<p>I:" + messages + "</p>");
+        chatData = {
+            "model": "gpt-3.5-turbo",
+            "messages": [{ "role": "user", "content": messages }]
+        }
+        $.ajax({
+            url: "https://api.openai.com/v1/chat/completions",
+            type: "post",
+            dataType: "json",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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'
+            },
+            data: JSON.stringify(chatData),
+            success: function (response) {
+                console.log(response)
+                $("#chatWindow").html($("#chatWindow").html() + "<p>chatGPT:" + response.choices[0].message.content + "</p>");
+            },
+            error: function () {
+            }
+        });
+    }
+	
+    function chatgptGenImage(messages) {
+        $("#chatWindow").html($("#chatWindow").html() + "<p>I:" + messages + "</p>");
+        chatData = {
+            "prompt": messages,
+            "n": 2,
+            "size": "1024x1024"
+        }
+        $.ajax({
+            url: "https://api.openai.com/v1/images/generations",
+            type: "post",
+            dataType: "json",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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'
+            },
+            data: JSON.stringify(chatData),
+            success: function (response) {
+                console.log(response)
+                response.data.forEach(element => {
+                    $("#chatWindow").html($("#chatWindow").html() + "<p>chatGPT:<img src=\"" + element.url + "\"></img></p>");
+                });
+            },
+            error: function () {
+            }
+        });
+    }
+</script>
+
+</html>
