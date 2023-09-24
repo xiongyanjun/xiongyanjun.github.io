@@ -15,8 +15,8 @@
         }
 
         .box {
-            width: 800px;
-            height: 800px;
+            width: 400px;
+            height: 400px;
             margin: 10px auto;
             position: relative;
             overflow: hidden;
@@ -52,7 +52,7 @@
         .pointer-bar {
             width: 60px;
             height: 25px;
-            background: white;
+            background: rgb(255, 255, 255);
             position: absolute;
             left: 50%;
             top: 50%;
@@ -135,6 +135,7 @@
 
 
     <script type="text/javascript">
+        document.body.style.zoom = '2.6'
         var rotate = 0;
 
         var random = function (num) {
@@ -291,7 +292,7 @@
                     layer.open({
                         type: 1,
                         area: '350px',
-                        offset: 't',
+                        offset: 'lt',
                         resize: false,
                         shadeClose: true,
                         title: '菜单',
