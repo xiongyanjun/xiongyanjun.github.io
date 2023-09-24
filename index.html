@@ -15,8 +15,8 @@
         }
 
         .box {
-            width: 500px;
-            height: 500px;
+            width: 800px;
+            height: 800px;
             margin: 10px auto;
             position: relative;
             overflow: hidden;
@@ -126,8 +126,10 @@
                 <div class="pointer-cursor"></div>
             </div>
         </div>
-        <button class="layui-btn layui-btn-sm" onclick="start()">开始</button>
-        <button class="layui-btn layui-bg-blue layui-btn-sm" lay-on="menu-page-custom">修改菜单</button>
+        <div>
+            <button class="layui-btn layui-btn-lg" onclick="start()">开始</button>
+            <button class="layui-btn layui-bg-blue layui-btn-lg" lay-on="menu-page-custom">修改菜单</button>
+        </div>
         <div class="winner"></div>
     </div>
 
@@ -240,13 +242,6 @@
 
         var isRunning = false;
 
-        function addMenu() {
-            list.push({
-                title: '椰子鸡',
-                color: randomColor()
-            })
-            init(list)
-        }
 
         function start() {
             if (isRunning) {
@@ -296,6 +291,7 @@
                     layer.open({
                         type: 1,
                         area: '350px',
+                        offset: 't',
                         resize: false,
                         shadeClose: true,
                         title: '菜单',
