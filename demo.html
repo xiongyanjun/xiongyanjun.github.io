@@ -1,0 +1,345 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>今天吃什么</title>
+    <link href="layui/css/layui.css" rel="stylesheet">
+    <script src="layui/layui.js"></script>
+    <style type="text/css">
+        body {
+            text-align: center;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .box {
+            width: 500px;
+            height: 500px;
+            margin: 10px auto;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            border: 5px solid black;
+            border-radius: 50%;
+            background: rgba(128, 128, 128, 0.49);
+            overflow: hidden;
+            position: relative;
+            transition: all 3s cubic-bezier(0.46, 0.03, 0.52, 0.96);
+        }
+
+        .pointer {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9;
+        }
+
+        .pointer-bar {
+            width: 60px;
+            height: 25px;
+            background: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(0, -50%);
+        }
+
+        .pointer-cursor {
+            width: 25px;
+            height: 25px;
+            position: absolute;
+            left: 85px;
+            top: 50%;
+            transform: translate(-50%, -50%) rotateZ(45deg);
+            background: white;
+        }
+
+        .part {
+            height: 100%;
+            width: 50%;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .bg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .title {
+            transform: translate(0, -50%);
+            transform-origin: left top;
+            width: 100%;
+            height: auto;
+            text-align: center;
+            font-size: 30px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            padding-left: 85px;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .winner {
+            font-size: 30px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layui-row">
+        <h1>今天吃什么</h1>
+        <div class="box">
+            <div class="main" ontransitionend="end()">
+                <div id="temp" class="part" style="display: none;">
+                    <div class="bg"></div>
+                    <div class="title"></div>
+                </div>
+            </div>
+
+            <div class="pointer">
+                <div class="pointer-bar"></div>
+                <div class="pointer-cursor"></div>
+            </div>
+        </div>
+        <button class="layui-btn layui-btn-sm" onclick="start()">开始</button>
+        <button class="layui-btn layui-bg-blue layui-btn-sm" lay-on="menu-page-custom">修改菜单</button>
+        <div class="winner"></div>
+    </div>
+
+
+    <script type="text/javascript">
+        var rotate = 0;
+
+        var random = function (num) {
+            return Math.random() * num;
+        };
+
+        var randomColor = function () {
+            return 'rgb(' + random(250) + ', ' + random(250) + ', ' + random(250) + ')';
+        };
+
+        var menuList = [
+            {
+                title: "麦当劳",
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '海底捞',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '八合里',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '木屋烧烤',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '椰子鸡',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '徽菜',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: "湖南菜",
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '四川菜',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '客家菜',
+                color: randomColor(),
+                selected: true
+            },
+            {
+                title: '茶餐厅',
+                color: randomColor(),
+                selected: false
+            },
+            {
+                title: '沙县',
+                color: randomColor(),
+                selected: false
+            },
+            {
+                title: '墨西哥菜',
+                color: randomColor(),
+                selected: false
+            }
+        ]
+
+        var list = menuList.filter(item => item.selected == true)
+
+        var perAngle = 360 / list.length;
+
+        var main = document.querySelector('.main');
+        var temp = document.querySelector('#temp');
+
+        init(list)
+
+        function init(list) {
+            perAngle = 360 / list.length;
+            for (var i in list) {
+                var item = list[i];
+
+                var newNode = temp.cloneNode(true);
+                newNode.style.display = 'block';
+                newNode.style.transform = 'rotateZ(' + (perAngle * i + perAngle / 2) + 'deg)';
+                newNode.querySelector('.bg').style.background = item.color;
+
+                if (list.length > 2) {
+                    var p = this.perAngle / 2; // 每份的角度两等分
+                    var d = Math.tan(p * Math.PI / 180) * 100; // 对边的长度
+                    var x = (100 - d) / 2; // 每份对边实际百分比
+                    newNode.style.clipPath = `polygon(0% 50%, 100% ${x}%, 100% ${100 - x}%)`;
+                }
+
+                newNode.querySelector('.title').innerHTML = item.title;
+
+                main.appendChild(newNode);
+            }
+        }
+
+        var isRunning = false;
+
+        function addMenu() {
+            list.push({
+                title: '椰子鸡',
+                color: randomColor()
+            })
+            init(list)
+        }
+
+        function start() {
+            if (isRunning) {
+                console.warn('isRunning');
+                return;
+            }
+
+            isRunning = true;
+
+            document.querySelector('.winner').innerHTML = '';
+
+            rotate += random(360) + 360 * 3; // 多转3圈
+
+            main.style.transform = 'rotateZ(-' + rotate + 'deg)';
+        }
+
+        function end() {
+            isRunning = false;
+
+            console.log(rotate);
+            var index = Math.floor(rotate / perAngle) % list.length;
+            var winner = list[index];
+            document.querySelector('.winner').innerHTML = '今天吃：' + winner.title;
+        }
+
+        function checkboxTmpl(nameList) {
+            tmpl = ''
+            for (var i = 0; i < nameList.length; i++) {
+                if (nameList[i].selected) {
+                    tmpl += `<input type="checkbox" checked name="${nameList[i].title}" lay-skin="primary" title="${nameList[i].title}">`
+                } else {
+                    tmpl += `<input type="checkbox" name="${nameList[i].title}" lay-skin="primary" title="${nameList[i].title}">`
+                }
+
+            }
+            return tmpl
+        }
+
+        layui.use(function () {
+            var $ = layui.$;
+            var layer = layui.layer;
+            var util = layui.util;
+            var form = layui.form;
+            var checkboxList = ""
+            util.on('lay-on', {
+                'menu-page-custom': function () {
+                    layer.open({
+                        type: 1,
+                        area: '350px',
+                        resize: false,
+                        shadeClose: true,
+                        title: '菜单',
+                        content: `
+          <div class="layui-form" lay-filter="filter-test-layer" style="margin: 16px;">
+            <div class="demo-login-container">
+              <div class="layui-form-item">
+                ${checkboxTmpl(menuList)}
+              </div>
+              <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="demo-login">确定</button>
+              </div>
+            </div>
+          </div>
+        `,
+                        success: function () {
+                            // 对弹层中的表单进行初始化渲染
+                            form.render();
+                            // 表单提交事件
+                            form.on('submit(demo-login)', function (data) {
+                                console.log(data.field)
+                                checks = data.field
+                                if (Object.getOwnPropertyNames(checks).length < 2) {
+                                    layer.msg('可选项过少');
+                                    return false
+                                }
+                                menuList.forEach(element => {
+                                    if (checks.hasOwnProperty(element.title)) {
+                                        element.selected = true
+                                    } else {
+                                        element.selected = false
+                                    }
+                                });
+                                list = menuList.filter(item => item.selected == true)
+                                init(list)
+                                layer.closeLast('page');
+                                return true; // 阻止默认 form 跳转
+                            });
+                        }
+                    });
+                }
+            })
+        })
+    </script>
+</body>
+
+</html>
