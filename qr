@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>扫二维码</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcdn.net/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
+	<style>
+		#video, #canvas {
+			display: block;
+			margin: 0 auto;
+		}
+	</style>
+</head>
+<body>
+	<h1>扫描二维码</h1>
+	<button id="start-button">开始扫描</button>
+	<div id="video-container"></div>
+	<canvas id="canvas"></canvas>
+	<script>
+		$(document).ready(function() {
+			var video = document.createElement('video');
+			video.setAttribute('id', 'video');
+			video.setAttribute('autoplay', '');
+			video.setAttribute('playsinline', '');
+			var canvas = document.getElementById('canvas');
+			var context = canvas.getContext('2d');
+			canvas.style.display = 'none';
+			var constraints = { audio: false, video: { facingMode: 'environment' } };
+			function startScan() {
+				Webcam.attach('#video-container');
+				function scan() {
+					context.drawImage(video, 0, 0, canvas.width, canvas.height);
+					try {
+						qrcode.decode();
+					} catch (error) {
+						setTimeout(scan, 500);
+					}
+				}
+				qrcode.callback = function(data) {
+					console.log(data);
+					Webcam.reset();
+					alert('扫描成功！二维码信息：' + data);
+				};
+				scan();
+			}
+			$('#start-button').on('click', function() {
+				navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+					video.srcObject = stream;
+					video.onloadedmetadata = function(e) {
+						video.play();
+						startScan();
+					};
+				}).catch(function(error) {
+					alert(error.message);
+				});
+			});
+		});
+	</script>
+</body>
+</html>
