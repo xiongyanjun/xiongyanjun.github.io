@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>•͈ ₃ •͈꧞</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: black;
+            font-family: Arial, sans-serif;
+            cursor: crosshair;
+        }
+        canvas {
+            display: block;
+            border: none;
+            background: black;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .center-text {
+            position: absolute;
+            top: calc(50% - 50px);
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff69b4;
+            font-size: 80px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff69b4, 0 0 80px #ff1493;
+            z-index: 100;
+            pointer-events: none;
+            user-select: none;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas"></canvas>
+    <div class="center-text">肖肖</div>
+    <!-- <div class="controls">
+        按住 ← → 键控制旋转 | 自动跳动模式 | 点击屏幕产生满天星星和爱心 | 爱心流星雨
+    </div> -->
+
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 动态尺寸变量
+        let WIDTH = 0;
+        let HEIGHT = 0;
+        
+        function resizeCanvas() {
+            WIDTH = canvas.width = window.innerWidth;
+            HEIGHT = canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // 常量定义
+        const BLACK = [0, 0, 0];
+        const PINK = [255, 105, 180];
+        const LIGHT_PINK = [255, 182, 193];
+        const HOT_PINK = [255, 20, 147];
+        const GALAXY_COLORS = [[180, 200, 255], [120, 160, 255], [255, 255, 255], [200, 120, 255]];
+        const STAR_COLORS = [[255, 255, 255], [255, 255, 180], [180, 255, 255], [255, 180, 255], [180, 255, 180]];
+        
+        // 全局变量
+        let angleY = 0;
+        let pulse = 0;
+        let lastTime = 0;
+        let keys = {};
+        
+        // 检查是否在3D爱心内
+        function isIn3DHeart(x, z, y) {
+            const scale = 0.7;
+            x = x / scale;
+            y = y / scale;
+            z = z / scale;
+            const term1 = (x * x + (9 * y * y) / 4.0 + z * z - 1);
+            const value = term1 * term1 * term1 - x * x * z * z * z - (9 * y * y * z * z * z) / 80.0;
+            return value <= 0;
+        }
+        
+        // 随机选择函数
+        function randomChoice(arr, weights = null) {
+            if (!weights) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            }
+            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+            let random = Math.random() * totalWeight;
+            for (let i = 0; i < arr.length; i++) {
+                random -= weights[i];
+                if (random <= 0) return arr[i];
+            }
+            return arr[arr.length - 1];
+        }
+        
+        // 粒子类
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                let x, y, z;
+                do {
+                    x = Math.random() * 3 - 1.5;
+                    y = Math.random() * 3 - 1.5;
+                    z = Math.random() * 3 - 1.5;
+                } while (!isIn3DHeart(x, y, z));
+                
+                this.x = x * 12;
+                this.y = y * 12;
+                this.z = z * 12;
+                this.dx = (Math.random() - 0.5) * 0.04;
+                this.dy = (Math.random() - 0.5) * 0.04;
+                this.dz = (Math.random() - 0.5) * 0.04;
+                this.baseColor = PINK;
+                this.baseSize = Math.random() * 0.8 + 0.5;
+            }
+            
+            update(angleY, pulseScale) {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.z += this.dz;
+                
+                if (!isIn3DHeart(this.x / 12, this.y / 12, this.z / 12)) {
+                    this.reset();
+                }
+                
+                const xRot = this.x * Math.cos(angleY) + this.z * Math.sin(angleY);
+                const zRot = -this.x * Math.sin(angleY) + this.z * Math.cos(angleY);
+                const yRot = this.y;
+                
+                const viewScale = Math.min(WIDTH, HEIGHT) * 0.032;
+                const scale = viewScale * pulseScale;
+                const distance = viewScale * 0.8;
+                const xProj = WIDTH / 2 + (xRot * scale);
+                const yProj = HEIGHT / 2 - (yRot * scale);
+                const depthFactor = (zRot + distance) / (2 * distance);
+                
+                const currSize = Math.max(1, this.baseSize * depthFactor);
+                const colorFactor = Math.min(1.0, Math.max(0.35, depthFactor * 1.6));
+                
+                const r = Math.min(255, Math.max(0, this.baseColor[0] * colorFactor));
+                const g = Math.min(255, Math.max(0, this.baseColor[1] * colorFactor));
+                const b = Math.min(255, Math.max(0, this.baseColor[2] * colorFactor));
+                
+                return {
+                    x: xProj,
+                    y: yProj,
+                    size: currSize,
+                    color: [r, g, b],
+                    depth: depthFactor
+                };
+            }
+            
+            draw(ctx, angleY, pulseScale) {
+                const result = this.update(angleY, pulseScale);
+                if (result.x >= 0 && result.x < WIDTH && result.y >= 0 && result.y < HEIGHT) {
+                    const alpha = 0.3 + 0.7 * result.depth;
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = `rgb(${Math.floor(result.color[0])}, ${Math.floor(result.color[1])}, ${Math.floor(result.color[2])})`;
+                    ctx.beginPath();
+                    ctx.arc(result.x, result.y, result.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+        
+        // 星河粒子类
+        class GalaxyParticle {
+            constructor() {
+                this.x = Math.random() * WIDTH;
+                this.y = Math.random() * HEIGHT;
+                this.z = Math.random() * 60 - 30;
+                this.size = Math.random() * 2 + 1;
+                this.color = randomChoice(GALAXY_COLORS);
+                this.baseAlpha = Math.random() * 208 + 12;
+                this.alpha = this.baseAlpha;
+                this.speed = Math.random() * 1 + 0.5;
+                this.angle = Math.random() * 0.4 - 0.2;
+                this.life = Math.random() * 60 + 60;
+                this.fadeSpeed = Math.random() * 0.02 + 0.01;
+            }
+            
+            update() {
+                this.y -= this.speed;
+                this.x += Math.sin(this.angle) * 0.5;
+                this.size = Math.max(0, this.size - this.fadeSpeed);
+                this.life -= 1;
+                
+                if (this.life < 30) {
+                    this.alpha = this.alpha * this.life / 30;
+                }
+                
+                return this.life > 0 && this.y > 0 && this.size > 0;
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.alpha / 255;
+                ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        
+        // 掉落粒子类
+        class ParticleDrop {
+            constructor(heartParticles, angleY, pulse) {
+                const sourceParticle = heartParticles[Math.floor(Math.random() * heartParticles.length)];
+                const result = sourceParticle.update(angleY, pulse);
+                this.x = result.x + (Math.random() - 0.5) * 160;
+                this.y = result.y + 50;
+                this.color = result.color;
+                this.size = Math.random() * 1.5 + 1.5;
+                this.speed = Math.random() * 2 + 1;
+                this.alpha = Math.random() * 75 + 180;
+                this.fadeSpeed = Math.random() * 1.5 + 1;
+                this.horizontalSpeed = (Math.random() - 0.5);
+                this.trail = [];
+            }
+            
+            update() {
+                this.y += this.speed;
+                this.x += this.horizontalSpeed;
+                this.alpha = Math.max(0, this.alpha - this.fadeSpeed);
+                
+                this.trail.push({
+                    x: this.x,
+                    y: this.y,
+                    size: this.size,
+                    alpha: this.alpha
+                });
+                
+                if (this.trail.length > 5) {
+                    this.trail.shift();
+                }
+                
+                return this.alpha > 0 && this.y < HEIGHT + 20;
+            }
+            
+            draw(ctx) {
+                // 绘制尾迹
+                this.trail.forEach((point, index) => {
+                    const fade = point.alpha * (index + 1) / this.trail.length;
+                    const size = Math.max(1, point.size * (index + 1) / this.trail.length);
+                    
+                    ctx.save();
+                    ctx.globalAlpha = fade / 255;
+                    ctx.fillStyle = `rgb(${Math.floor(this.color[0])}, ${Math.floor(this.color[1])}, ${Math.floor(this.color[2])})`;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+                
+                // 绘制主粒子
+                ctx.save();
+                ctx.globalAlpha = this.alpha / 255;
+                ctx.fillStyle = `rgb(${Math.floor(this.color[0])}, ${Math.floor(this.color[1])}, ${Math.floor(this.color[2])})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        
+        // 流星雨爱心粒子类
+        class FallingHeartParticle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * (WIDTH + 200) - 100; // 从屏幕稍微外面开始
+                this.y = -20; // 从屏幕上方开始
+                this.vx = (Math.random() - 0.7) * 2; // 稍微向左飘
+                this.vy = Math.random() * 3 + 2; // 下落速度
+                this.size = Math.random() * 12 + 8;
+                this.color = PINK;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.alpha = Math.random() * 0.8 + 0.2;
+                this.trail = [];
+                this.life = Math.random() * 200 + 300;
+                this.maxLife = this.life;
+                this.twinkle = Math.random() * Math.PI * 2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rotationSpeed;
+                this.twinkle += 0.15;
+                this.life -= 1;
+                
+                // 添加尾迹
+                this.trail.push({
+                    x: this.x,
+                    y: this.y,
+                    size: this.size * 0.6,
+                    alpha: this.alpha * 0.3
+                });
+                
+                // 限制尾迹长度
+                if (this.trail.length > 8) {
+                    this.trail.shift();
+                }
+                
+                // 如果超出屏幕底部，重置到顶部
+                if (this.y > HEIGHT + 50 || this.x < -100 || this.x > WIDTH + 100 || this.life <= 0) {
+                    this.reset();
+                }
+                
+                return true;
+            }
+            
+            draw(ctx) {
+                // 绘制尾迹
+                this.trail.forEach((point, index) => {
+                    const trailAlpha = point.alpha * (index + 1) / this.trail.length;
+                    const trailSize = point.size * (index + 1) / this.trail.length;
+                    
+                    ctx.save();
+                    ctx.globalAlpha = trailAlpha;
+                    ctx.translate(point.x, point.y);
+                    ctx.scale(trailSize / 10, trailSize / 10);
+                    
+                    ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 3);
+                    ctx.bezierCurveTo(-5, -2, -10, 1, -5, 6);
+                    ctx.bezierCurveTo(-3, 8, 0, 10, 0, 10);
+                    ctx.bezierCurveTo(0, 10, 3, 8, 5, 6);
+                    ctx.bezierCurveTo(10, 1, 5, -2, 0, 3);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                });
+                
+                // 绘制主爱心
+                const twinkleEffect = 0.8 + 0.2 * Math.sin(this.twinkle);
+                
+                ctx.save();
+                ctx.globalAlpha = this.alpha * twinkleEffect;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.scale(this.size / 10, this.size / 10);
+                
+                // 爱心形状
+                ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.beginPath();
+                ctx.moveTo(0, 3);
+                ctx.bezierCurveTo(-5, -2, -10, 1, -5, 6);
+                ctx.bezierCurveTo(-3, 8, 0, 10, 0, 10);
+                ctx.bezierCurveTo(0, 10, 3, 8, 5, 6);
+                ctx.bezierCurveTo(10, 1, 5, -2, 0, 3);
+                ctx.fill();
+                
+                // 发光效果
+                ctx.globalAlpha = this.alpha * twinkleEffect * 0.3;
+                ctx.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        // 点击星星粒子类
+        class ClickStarParticle {
+            constructor(x, y) {
+                this.x = x + (Math.random() - 0.5) * 100;
+                this.y = y + (Math.random() - 0.5) * 100;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8 - Math.random() * 3;
+                this.size = Math.random() * 4 + 2;
+                this.color = randomChoice(STAR_COLORS);
+                this.life = Math.random() * 60 + 120;
+                this.maxLife = this.life;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+                this.twinkle = Math.random() * Math.PI * 2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.1; // 重力
+                this.vx *= 0.99; // 阻力
+                this.life -= 1;
+                this.rotation += this.rotationSpeed;
+                this.twinkle += 0.2;
+                
+                return this.life > 0;
+            }
+            
+            draw(ctx) {
+                const alpha = this.life / this.maxLife;
+                const twinkleAlpha = alpha * (0.7 + 0.3 * Math.sin(this.twinkle));
+                
+                ctx.save();
+                ctx.globalAlpha = twinkleAlpha;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // 绘制星星形状
+                ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.beginPath();
+                
+                // 5角星
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+                    const x = Math.cos(angle) * this.size;
+                    const y = Math.sin(angle) * this.size;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    
+                    const innerAngle = ((i + 0.5) * Math.PI * 2) / 5 - Math.PI / 2;
+                    const innerX = Math.cos(innerAngle) * this.size * 0.4;
+                    const innerY = Math.sin(innerAngle) * this.size * 0.4;
+                    ctx.lineTo(innerX, innerY);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                // 添加发光效果
+                ctx.globalAlpha = twinkleAlpha * 0.3;
+                ctx.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        // 点击爱心粒子类
+        class ClickHeartParticle {
+            constructor(x, y) {
+                this.x = x + (Math.random() - 0.5) * 50;
+                this.y = y + (Math.random() - 0.5) * 50;
+                this.vx = (Math.random() - 0.5) * 6;
+                this.vy = -Math.random() * 8 - 2;
+                this.size = Math.random() * 8 + 6;
+                this.color = PINK;
+                this.life = Math.random() * 40 + 80;
+                this.maxLife = this.life;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.15; // 重力
+                this.vx *= 0.98; // 阻力
+                this.life -= 1;
+                this.rotation += this.rotationSpeed;
+                
+                return this.life > 0;
+            }
+            
+            draw(ctx) {
+                const alpha = this.life / this.maxLife;
+                
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.scale(this.size / 10, this.size / 10);
+                
+                // 绘制爱心形状
+                ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.beginPath();
+                ctx.moveTo(0, 3);
+                ctx.bezierCurveTo(-5, -2, -10, 1, -5, 6);
+                ctx.bezierCurveTo(-3, 8, 0, 10, 0, 10);
+                ctx.bezierCurveTo(0, 10, 3, 8, 5, 6);
+                ctx.bezierCurveTo(10, 1, 5, -2, 0, 3);
+                ctx.fill();
+                
+                // 添加发光效果
+                ctx.globalAlpha = alpha * 0.3;
+                ctx.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        // 初始化粒子系统
+        const particles = [];
+        for (let i = 0; i < 16000; i++) {
+            particles.push(new Particle());
+        }
+        
+        let galaxyParticles = [];
+        let dropParticles = [];
+        let clickStars = [];
+        let clickHearts = [];
+        let fallingHearts = []; // 新增：掉落爱心数组
+        
+        // 初始化掉落爱心
+        for (let i = 0; i < 15; i++) { // 15个爱心，性能友好
+            fallingHearts.push(new FallingHeartParticle());
+        }
+        
+        // 键盘事件处理
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+        
+        // 点击事件处理
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 生成星星粒子
+            for (let i = 0; i < 15; i++) {
+                clickStars.push(new ClickStarParticle(x, y));
+            }
+            
+            // 生成爱心粒子
+            for (let i = 0; i < 8; i++) {
+                clickHearts.push(new ClickHeartParticle(x, y));
+            }
+        });
+        
+        // 主动画循环
+        function animate(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            // 处理键盘输入
+            if (keys['ArrowLeft']) {
+                angleY -= 0.05;
+            }
+            if (keys['ArrowRight']) {
+                angleY += 0.05;
+            }
+            
+            // 自动旋转和跳动
+            angleY += 0.01;
+            
+            // 增强跳动效果 - 使用更复杂的波形组合
+            const time = currentTime * 0.001;
+            const heartbeat1 = Math.sin(time * 4) * 0.15; // 主心跳
+            const heartbeat2 = Math.sin(time * 8) * 0.05; // 副心跳
+            const slowPulse = Math.sin(time * 1.5) * 0.1; // 慢脉冲
+            pulse = 0.85 + heartbeat1 + heartbeat2 + slowPulse;
+               
+            // 清除画布
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            
+            // 添加渐变效果
+            ctx.save();
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.restore();
+            
+            // 生成新的星河粒子
+            if (Math.random() < 0.6) {
+                galaxyParticles.push(new GalaxyParticle());
+            }
+            
+            // 生成新的掉落粒子
+            if (dropParticles.length < 300 && Math.random() < 0.95) {
+                dropParticles.push(new ParticleDrop(particles, angleY, pulse));
+            }
+            
+            // 更新和绘制星河粒子
+            galaxyParticles = galaxyParticles.filter(p => p.update());
+            galaxyParticles.forEach(p => p.draw(ctx));
+            
+            // 更新和绘制掉落粒子
+            dropParticles = dropParticles.filter(p => p.update());
+            dropParticles.forEach(p => p.draw(ctx));
+            
+            // 更新和绘制掉落爱心流星雨
+            fallingHearts.forEach(heart => {
+                heart.update();
+                heart.draw(ctx);
+            });
+            
+            // 更新和绘制点击星星
+            clickStars = clickStars.filter(star => star.update());
+            clickStars.forEach(star => star.draw(ctx));
+            
+            // 更新和绘制点击爱心
+            clickHearts = clickHearts.filter(heart => heart.update());
+            clickHearts.forEach(heart => heart.draw(ctx));
+            
+            // 绘制爱心粒子
+            particles.forEach(particle => {
+                particle.draw(ctx, angleY, pulse);
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        // 开始动画
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
