@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://xiongyanjun.github.io/sitemap.xml

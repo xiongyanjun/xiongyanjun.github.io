@@ -5,7 +5,7 @@
 ## 本地使用
 
 ```bash
-npm run build     # 生成站点到 dist/
+npm run build     # 生成站点（直接写到仓库根目录）
 npm run serve     # 本地预览 http://localhost:4321
 npm run dev       # 构建 + 预览
 ```
@@ -15,14 +15,22 @@ npm run dev       # 构建 + 预览
 ## 目录结构
 
 ```
-content/posts/*.md     文章源文件（Markdown + front matter）
-site/assets/           样式与脚本（构建时复制到 dist/）
-scripts/build.mjs      构建脚本
-scripts/serve.mjs      本地预览服务器
-scripts/lib/markdown.mjs  Markdown 渲染器
-site.config.mjs        站点信息、导航、标签与脉络定义
-dist/                  构建产物（已 gitignore）
+content/posts/*.md       文章源文件（Markdown + front matter）
+site/assets/             样式与脚本源码（构建时复制到根目录 assets/）
+scripts/build.mjs        构建脚本
+scripts/serve.mjs        本地预览服务器
+scripts/check-links.mjs  站内链接自检
+scripts/lib/markdown.mjs Markdown 渲染器
+site.config.mjs          站点信息、导航、方向与标签定义
+
+index.html archive.html areas.html tags.html about.html search.html 404.html
+posts/ area/ tag/ assets/ feed.xml sitemap.xml robots.txt .nojekyll
+                          ↑ 以上都是构建产物，直接生成在仓库根目录
 ```
+
+构建产物和源码放在同一个仓库里：根目录就是对外发布的站点，源码留在
+`content/`、`scripts/`、`site/` 里。这样推送到 GitHub 就等于发布，不需要额外的
+CI 或发布设置。
 
 ## 写一篇新文章
 
@@ -54,13 +62,17 @@ summary: 一句话摘要，会显示在列表页和搜索结果里。
 
 ## 部署到 GitHub Pages
 
-1. 新建仓库。如果站点要落在 `https://<用户名>.github.io`，仓库名必须是 `<用户名>.github.io`；否则站点地址是 `https://<用户名>.github.io/<仓库名>/`。
-2. 把本项目推到仓库的 `main` 分支。
-3. 仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
-4. 推送后自动构建部署。
-5. 把 `site.config.mjs` 里的 `SITE.url` 改成你的实际网址（影响 RSS 与 sitemap）。
+1. 本地执行 `node scripts/build.mjs` 生成站点。
+2. 推送到仓库的 `main` 分支。
+3. 仓库 **Settings → Pages → Build and deployment → Source** 设为 **Deploy from a
+   branch**，分支选 `main`、目录选 `/ (root)`。
 
-构建产物全部使用相对路径，部署在子路径下也能直接工作。
+因为所有链接都是相对路径，站点既可以发布在 `https://<用户名>.github.io` 根目录，
+也可以放在 `https://<用户名>.github.io/<仓库名>/` 这样的子路径下，不需要改代码。
+
+如果更希望「推送即构建」，可以改回 GitHub Actions 方式：加一个
+`actions/upload-pages-artifact` + `actions/deploy-pages` 的工作流，把 Pages 的
+Source 切成 **GitHub Actions**，并把构建输出目录改回单独的 `dist/`。
 
 ## 设计说明
 

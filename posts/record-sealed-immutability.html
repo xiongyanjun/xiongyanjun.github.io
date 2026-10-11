@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>record、sealed 与不可变设计 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="record、sealed 与不可变设计 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/jvm.html">JVM 与性能</a>
+      <a class="badge" href="../tag/jvm.html">JVM</a>
+      <span class="badge badge-draft">待写</span>
+    </div>
+    <h1 class="post-title">record、sealed 与不可变设计</h1>
+    <p class="post-subtitle">Records, Sealed Types, and Immutability</p>
+    <p class="post-meta">
+      <time datetime="2026-05-31">2026 年 5 月 31 日</time>
+      
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      <p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>
+      <p>我们在一批 DTO 上换成 record，代码量少了大概四成，但更重要的是它顺带暴露了几处“本该不可变却能被改动”的设计问题。这篇讲 record、sealed 与模式匹配配合使用时的实际收益。</p>
+<h2 id="这篇文章要处理的问题"><a class="anchor" href="#这篇文章要处理的问题" aria-hidden="true">#</a>这篇文章要处理的问题</h2>
+<ul><li>record 与 Lombok 的 <code>@Value</code> 在语义和兼容性上有什么本质区别？</li><li>sealed 接口配上 switch 模式匹配，能减少多少防御性代码？</li><li>什么时候不该用 record，可变性的代价真的那么大吗？</li></ul>
+    </div>
+    
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">JVM 与性能</p>
+    <p class="area-callout-desc">内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。</p>
+    <a class="btn btn-link" href="../area/jvm.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="boundary-test-cases.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">边界用例：我为什么还在写那些「没用」的测试</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="merging-services-back.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">我们把服务重新合并回了单体</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/high-cpu-investigation.html">
+  <div class="post-card-meta">
+    <time datetime="2026-08-30">2026-08-30</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">一次线上 CPU 飙高的排查过程<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Chasing a CPU Spike</p>
+  <p class="post-card-summary">CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/graalvm-native-image-cost.html">
+  <div class="post-card-meta">
+    <time datetime="2026-01-18">2026-01-18</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    <span class="sep">·</span><span>4 分钟</span>
+  </div>
+  <h3 class="post-card-title">GraalVM Native Image 在 Spring Boot 3 上的成本清单</h3>
+  <p class="post-card-sub">The Real Cost of Native Image</p>
+  <p class="post-card-summary">启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/jdk21-features-in-production.html">
+  <div class="post-card-meta">
+    <time datetime="2025-10-12">2025-10-12</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">JDK 21 的几个新特性，我在生产里用了哪些<span class="badge">待写</span></h3>
+  <p class="post-card-sub">JDK 21 Features I Actually Use</p>
+  <p class="post-card-summary">虚拟线程、record pattern、模式匹配 switch、顺序集合、ScopedValue。有些立刻用上了，有些还在观察，有些暂时不适合。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

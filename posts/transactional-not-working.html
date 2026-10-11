@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@Transactional 失效的几种场景 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="事务失效最麻烦的地方是它不报错。方法正常返回、日志正常打印、数据就是没回滚。这篇按触发条件整理常见场景和验证方式。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="@Transactional 失效的几种场景 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="事务失效最麻烦的地方是它不报错。方法正常返回、日志正常打印、数据就是没回滚。这篇按触发条件整理常见场景和验证方式。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/spring.html">Spring 与生态</a>
+      <a class="badge" href="../tag/spring.html">Spring</a><a class="badge" href="../tag/transaction.html">事务</a>
+      <span class="badge badge-draft">待写</span>
+    </div>
+    <h1 class="post-title">@Transactional 失效的几种场景</h1>
+    <p class="post-subtitle">When @Transactional Silently Fails</p>
+    <p class="post-meta">
+      <time datetime="2023-08-20">2023 年 8 月 20 日</time>
+      
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      <p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>
+      <p>一次数据不一致的排查最后落到一行代码上：同类内部调用了一个带 <code>@Transactional</code> 的方法。代理没被走到，事务自然不存在。这篇把失效场景按“为什么代理失效”“为什么异常没被感知”两类整理。</p>
+<h2 id="这篇文章要处理的问题"><a class="anchor" href="#这篇文章要处理的问题" aria-hidden="true">#</a>这篇文章要处理的问题</h2>
+<ul><li>哪些调用方式会绕过代理，如何快速判断当前调用是否走了代理？</li><li>异常类型、嵌套传播行为分别如何决定回滚与否？</li><li>怎么用集成测试证明事务真的生效，而不是靠肉眼检查代码？</li></ul>
+    </div>
+    
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">Spring 与生态</p>
+    <p class="area-callout-desc">IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。</p>
+    <a class="btn btn-link" href="../area/spring.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="mybatis-one-to-many-duplicated-rows.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">MyBatis 一对多映射为什么返回重复行</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="spring-circular-dependency.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">Spring 循环依赖：三级缓存到底解决了什么</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/spring-boot-autoconfiguration-order.html">
+  <div class="post-card-meta">
+    <time datetime="2025-01-19">2025-01-19</time>
+    <span class="sep">·</span><span>Spring 与生态</span>
+    
+  </div>
+  <h3 class="post-card-title">Spring Boot 自动配置的加载顺序与覆盖<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Autoconfiguration Ordering</p>
+  <p class="post-card-summary">我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/spring-circular-dependency.html">
+  <div class="post-card-meta">
+    <time datetime="2023-07-16">2023-07-16</time>
+    <span class="sep">·</span><span>Spring 与生态</span>
+    <span class="sep">·</span><span>3 分钟</span>
+  </div>
+  <h3 class="post-card-title">Spring 循环依赖：三级缓存到底解决了什么</h3>
+  <p class="post-card-sub">Circular Dependencies and the Three-Level Cache</p>
+  <p class="post-card-summary">三级缓存不是为了“提前暴露对象”这么简单，它解决的是 AOP 场景下代理对象什么时候创建的问题。搞懂这一点，才能解释构造器注入为什么救不了循环依赖。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/mvcc-repeatable-read.html">
+  <div class="post-card-meta">
+    <time datetime="2024-07-21">2024-07-21</time>
+    <span class="sep">·</span><span>数据与中间件</span>
+    
+  </div>
+  <h3 class="post-card-title">事务隔离级别与 MVCC：可重复读到底读到了什么<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Isolation Levels and MVCC</p>
+  <p class="post-card-summary">快照是什么时候建立的、当前读和快照读的区别，决定了你在同一个事务里会不会看到“两副面孔”的数据。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

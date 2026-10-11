@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring 循环依赖：三级缓存到底解决了什么 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="三级缓存不是为了“提前暴露对象”这么简单，它解决的是 AOP 场景下代理对象什么时候创建的问题。搞懂这一点，才能解释构造器注入为什么救不了循环依赖。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="Spring 循环依赖：三级缓存到底解决了什么 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="三级缓存不是为了“提前暴露对象”这么简单，它解决的是 AOP 场景下代理对象什么时候创建的问题。搞懂这一点，才能解释构造器注入为什么救不了循环依赖。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/spring.html">Spring 与生态</a>
+      <a class="badge" href="../tag/spring.html">Spring</a>
+      
+    </div>
+    <h1 class="post-title">Spring 循环依赖：三级缓存到底解决了什么</h1>
+    <p class="post-subtitle">Circular Dependencies and the Three-Level Cache</p>
+    <p class="post-meta">
+      <time datetime="2023-07-16">2023 年 7 月 16 日</time>
+      <span class="sep">·</span>约 3 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>第一次看到这个报错的时候，我以为是自己把顺序写错了：</p>
+<figure class="code-block"><pre><code>BeanCurrentlyInCreationException:
+Error creating bean with name 'orderService':
+Requested bean is currently in creation: Is there an unresolvable circular reference?</code></pre></figure>
+<p>奇怪的是，另一个模块里同样存在 A 依赖 B、B 又依赖 A 的情况，却启动得好好的。</p>
+<p>差别在于注入方式。</p>
+<h2 id="为什么字段注入能解决构造器注入不行"><a class="anchor" href="#为什么字段注入能解决构造器注入不行" aria-hidden="true">#</a>为什么字段注入能解决，构造器注入不行</h2>
+<p>Spring 创建单例 bean 的过程大致是：实例化 → 属性填充 → 初始化。</p>
+<p>关键在于<strong>实例化之后，对象已经在内存里了</strong>，只是属性还没填。如果是字段注入或 setter 注入，Spring 可以把这个“半成品”提前暴露出去，让 B 先拿到它的引用，等 A 的属性填完再继续。</p>
+<p>构造器注入没有这个空间：要构造 A 就必须先有 B，要构造 B 又必须先有 A，鸡生蛋的问题在“实例化”这一步就卡死了，根本没有可以提前暴露的东西。</p>
+<p>所以：</p>
+<div class="table-wrap"><table><thead><tr><th>注入方式</th><th>循环依赖</th><th>原因</th></tr></thead><tbody><tr><td>构造器注入</td><td>启动失败</td><td>实例化阶段就需要对方，没有半成品可用</td></tr><tr><td>字段 / setter 注入</td><td>可以解决</td><td>实例已创建，可以先给引用再填属性</td></tr></tbody></table></div>
+<p><strong>这也是为什么官方推荐构造器注入</strong>：它把问题暴露在启动时，而不是让你带着一个设计上的环继续跑下去。</p>
+<h2 id="三个缓存分别装什么"><a class="anchor" href="#三个缓存分别装什么" aria-hidden="true">#</a>三个缓存分别装什么</h2>
+<p><code>DefaultSingletonBeanRegistry</code> 里确实有三个 Map，但它们的职责不是“缓存三级”这么简单：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">/** 一级：完全初始化好的成品 */
+private final Map&lt;String, Object&gt; singletonObjects = new ConcurrentHashMap&lt;&gt;(256);
+
+/** 二级：早期的、还没填完属性的半成品（可能是代理） */
+private final Map&lt;String, Object&gt; earlySingletonObjects = new ConcurrentHashMap&lt;&gt;(16);
+
+/** 三级：能生产早期引用的工厂 */
+private final Map&lt;String, ObjectFactory&lt;?&gt;&gt; singletonFactories = new HashMap&lt;&gt;(16);</code></pre></figure>
+<p>取 bean 的逻辑在 <code>getSingleton(String beanName, boolean allowEarlyReference)</code> 里，顺序是：一级 → 二级 → 三级。命中三级缓存时会调用工厂拿到早期引用，然后<strong>放进二级缓存，同时清掉三级</strong>。</p>
+<h2 id="为什么必须有第三级"><a class="anchor" href="#为什么必须有第三级" aria-hidden="true">#</a>为什么必须有第三级</h2>
+<p>这是面试最爱问、也最容易讲错的地方。答案不是“为了加速”，而是 <strong>AOP</strong>。</p>
+<p>我们改一下场景：A 上面加了 <code>@Transactional</code>，那么最终放进容器的 A 是一个代理对象。现在 B 需要注入 A：</p>
+<ul><li>如果 A 和 B <strong>没有</strong>循环依赖，A 会正常走完初始化，在 <code>initializeBean</code> 阶段被代理，放进一级缓存的是代理。</li><li>如果 A 和 B <strong>有</strong>循环依赖，B 在 A 还没初始化完的时候就要拿到 A。这时候给它原始对象还是代理对象？</li></ul>
+<p>给原始对象，B 后续调用 A 的事务方法就不会走切面——<strong>这是非常隐蔽的 bug，编译通过、启动正常、事务悄悄失效。</strong></p>
+<p>三级缓存放的是一个 <code>ObjectFactory</code>，它的实现里调用了 <code>getEarlyBeanReference</code>，而后者会通知那些 <code>SmartInstantiationAwareBeanPostProcessor</code>（AOP 的自动代理创建器就是其中之一）：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">protected Object getEarlyBeanReference(String beanName, RootBeanDefinition mbd, Object bean) {
+    Object exposedObject = bean;
+    for (BeanPostProcessor bp : getBeanPostProcessors()) {
+        if (bp instanceof SmartInstantiationAwareBeanPostProcessor ibp) {
+            exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
+        }
+    }
+    return exposedObject;
+}</code></pre></figure>
+<p>关键在于这个动作是<strong>延迟</strong>的：只有真的发生循环依赖、真的需要提前引用时，才会去生成代理。没有循环依赖的场景一次都不会调用，代理仍然在正常的生命周期节点创建。</p>
+<p>如果只用二级缓存直接存原始对象，就必须在实例化之后立刻判断“要不要提前代理”——为一个很少发生的情况付出每次创建都要检查的成本，而且会破坏 AOP 的时机约定。</p>
+<h2 id="于是有了一个反直觉的细节"><a class="anchor" href="#于是有了一个反直觉的细节" aria-hidden="true">#</a>于是有了一个反直觉的细节</h2>
+<p>提前生成的代理会被记在 <code>earlyProxyReferences</code> 里。等 A 走完初始化进入 <code>wrapIfNecessary</code> 时，AOP 会发现“这个 bean 我已经提前代理过了”，于是直接返回原来那个早期引用，不再生成第二个代理。</p>
+<p>如果没有这个记录，A 就会有两个代理实例：B 持有早期那个，容器持有后来那个。事务能用，但对象身份不一致——这正是 <code>@Async</code>、<code>@Transactional</code> 在循环依赖场景里行为诡异的部分来源。</p>
+<h2 id="我能从这件事里学到什么"><a class="anchor" href="#我能从这件事里学到什么" aria-hidden="true">#</a>我能从这件事里学到什么</h2>
+<p>三级缓存是个漂亮的设计：它把“要不要提前代理”这个判断延后到了必须做决定的时刻。但它解决的问题，本质上是一个本该避免的问题。</p>
+<p>我现在对循环依赖的处理方式是：</p>
+<ol><li><strong>先看是不是设计问题</strong>。绝大多数 A↔B 互相依赖，都说明有一个职责被切错了地方。</li><li><strong>能拆就拆</strong>。把共享的部分抽成第三个 bean，环就消失了。</li><li><strong>实在拆不动，再考虑 <code>@Lazy</code></strong>。它会注入一个代理，把依赖推迟到第一次调用，成本是问题被推迟到运行期。</li></ol>
+<p>Spring 能兜住的事，不代表它应该兜住。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#为什么字段注入能解决构造器注入不行">为什么字段注入能解决，构造器注入不行</a></li><li class="toc-l2"><a href="#三个缓存分别装什么">三个缓存分别装什么</a></li><li class="toc-l2"><a href="#为什么必须有第三级">为什么必须有第三级</a></li><li class="toc-l2"><a href="#于是有了一个反直觉的细节">于是有了一个反直觉的细节</a></li><li class="toc-l2"><a href="#我能从这件事里学到什么">我能从这件事里学到什么</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">Spring 与生态</p>
+    <p class="area-callout-desc">IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。</p>
+    <a class="btn btn-link" href="../area/spring.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="transactional-not-working.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">@Transactional 失效的几种场景</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="g1-or-zgc.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">G1 还是 ZGC：怎么为一个服务选垃圾收集器</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/spring-boot-autoconfiguration-order.html">
+  <div class="post-card-meta">
+    <time datetime="2025-01-19">2025-01-19</time>
+    <span class="sep">·</span><span>Spring 与生态</span>
+    
+  </div>
+  <h3 class="post-card-title">Spring Boot 自动配置的加载顺序与覆盖<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Autoconfiguration Ordering</p>
+  <p class="post-card-summary">我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/transactional-not-working.html">
+  <div class="post-card-meta">
+    <time datetime="2023-08-20">2023-08-20</time>
+    <span class="sep">·</span><span>Spring 与生态</span>
+    
+  </div>
+  <h3 class="post-card-title">@Transactional 失效的几种场景<span class="badge">待写</span></h3>
+  <p class="post-card-sub">When @Transactional Silently Fails</p>
+  <p class="post-card-summary">事务失效最麻烦的地方是它不报错。方法正常返回、日志正常打印、数据就是没回滚。这篇按触发条件整理常见场景和验证方式。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraalVM Native Image 在 Spring Boot 3 上的成本清单 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="GraalVM Native Image 在 Spring Boot 3 上的成本清单 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/jvm.html">JVM 与性能</a>
+      <a class="badge" href="../tag/jvm.html">JVM</a><a class="badge" href="../tag/performance.html">性能调优</a>
+      
+    </div>
+    <h1 class="post-title">GraalVM Native Image 在 Spring Boot 3 上的成本清单</h1>
+    <p class="post-subtitle">The Real Cost of Native Image</p>
+    <p class="post-meta">
+      <time datetime="2026-01-18">2026 年 1 月 18 日</time>
+      <span class="sep">·</span>约 4 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>我们用 GraalVM Native Image 重做了两个服务：一个内部管理后台，一个对外开放的 API。</p>
+<p>选它的理由是启动时间。第一个服务跑在 K8s 上，每次滚动发布都会有一段时间的实例冷启动，扩容也慢。第二个是为将来做 Serverless 部署探路。</p>
+<h2 id="先说数字"><a class="anchor" href="#先说数字" aria-hidden="true">#</a>先说数字</h2>
+<p>同一份代码，两个构建产物在同等规格的容器里跑：</p>
+<div class="table-wrap"><table><thead><tr><th>指标</th><th>JVM (JDK 21)</th><th>Native Image</th></tr></thead><tbody><tr><td>启动时间</td><td>2.1s</td><td>92ms</td></tr><tr><td>常驻内存</td><td>420MB</td><td>105MB</td></tr><tr><td>镜像体积</td><td>218MB</td><td>96MB</td></tr><tr><td>构建时间</td><td>48s</td><td>4m12s</td></tr><tr><td>峰值 QPS</td><td>3,400</td><td>3,150</td></tr><tr><td>p99</td><td>42ms</td><td>46ms</td></tr></tbody></table></div>
+<p>前两行很漂亮，后两行说明它不是免费的：吞吐略低——因为没有 JIT 的分层编译和运行时优化，峰值性能通常不如 HotSpot。<strong>如果你的服务是长期驻留、吃满流量的，Native Image 不是性能优化，是内存和启动优化。</strong></p>
+<h2 id="成本一构建链路要重做"><a class="anchor" href="#成本一构建链路要重做" aria-hidden="true">#</a>成本一：构建链路要重做</h2>
+<p>Native Image 构建依赖 GraalVM 的本地工具链，CI 上需要一个专门的构建镜像，构建时长从 48 秒变成四分多钟。这意味着：</p>
+<ul><li>本地开发基本不会执行 native 构建，只能交给 CI；</li><li>每次改动都要等 CI 跑完才能验证 native 相关问题；</li><li>构建机器的内存要求明显提高（我们用 8G 构建，偶尔要调到 12G）。</li></ul>
+<p>我们最后把它拆成两条流水线：主分支快速构建 JVM 包做集成测试，每晚跑一次 native 构建并部署到预发。</p>
+<h2 id="成本二反射资源动态代理都要登记"><a class="anchor" href="#成本二反射资源动态代理都要登记" aria-hidden="true">#</a>成本二：反射、资源、动态代理都要登记</h2>
+<p>这是主要工作量所在。GraalVM 是封闭世界假设（closed-world assumption），编译期看不到的东西运行时就找不到。Spring Boot 3 的 AOT 引擎能自动处理绝大部分框架内部的反射，但业务自己的代码要显式登记：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 最常见的两类：JSON 反序列化的目标类型，以及自己用的反射
+@RegisterReflectionForBinding({OrderDTO.class, OrderItemDTO.class})
+@Configuration
+public class NativeHintsConfig {
+
+    @Bean
+    RuntimeHintsRegistrar legacyHints() {
+        return (hints, classLoader) -&gt; {
+            // 老代码里的反射调用，编译期无法推断
+            hints.reflection().registerType(ReportModel.class,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                    MemberCategory.INVOKE_DECLARED_METHODS);
+            hints.resources().registerPattern("templates/*.ftl");
+        };
+    }
+}</code></pre></figure>
+<p>漏登记的症状通常是运行时报 <code>ClassNotFoundException</code> 或返回字段全是 <code>null</code>，而且<strong>只在被你遗漏的那条代码路径上出现</strong>——测试覆盖不到的地方最容易出事。</p>
+<p>我们踩得最深的一次是 MyBatis 的映射对象：字段全是 <code>null</code>，日志毫无异常。原因是 <code>OrderDO</code> 没有登记反射，Jackson 反序列化出了一个空对象。这类问题在 JVM 模式下永远不会出现。</p>
+<h2 id="成本三aop-与动态代理的边界"><a class="anchor" href="#成本三aop-与动态代理的边界" aria-hidden="true">#</a>成本三：AOP 与动态代理的边界</h2>
+<p>Spring 的 <code>@Transactional</code>、<code>@Async</code> 在 native 下依然可用，因为 AOT 引擎在编译期把代理类生成了出来。但两种情况要注意：</p>
+<ul><li><strong>运行期才知道的 CGLIB 代理</strong>（比如某些动态注册的 bean）不适用；</li><li><strong>类加载期做增强的库</strong>（部分 APM agent、字节码工具）直接不能用。</li></ul>
+<p>我们有一次引入 APM 探针，JVM 版本一切正常，native 版本启动直接失败。结论很明确：<strong>用 native 之前，先确认依赖链里没有做运行时字节码增强的东西。</strong></p>
+<h2 id="成本四排查工具基本回到十年前"><a class="anchor" href="#成本四排查工具基本回到十年前" aria-hidden="true">#</a>成本四：排查工具基本回到十年前</h2>
+<p>这是最容易被低估的成本。native 可执行文件没有 JVM，意味着：</p>
+<ul><li><code>jstack</code>、<code>jmap</code>、<code>jstat</code>、<code>jcmd</code> 都用不了；</li><li>GC 日志格式不同，可读性下降；</li><li>火焰图要靠 <code>perf</code> 或 async-profiler 的 native 模式，采样体验不如 JVM；</li><li>线上内存问题基本只能靠监控指标，拿不到堆转储。</li></ul>
+<p>对一个刚上线、可能出各种问题的服务来说，这是一个很大的代价。我们的做法是：<strong>native 版本先跑在无状态、逻辑简单、可快速回滚的服务上</strong>，把复杂业务留在 JVM 上。</p>
+<h2 id="成本五构建期初始化"><a class="anchor" href="#成本五构建期初始化" aria-hidden="true">#</a>成本五：构建期初始化</h2>
+<p>Native Image 默认在编译期初始化静态状态。如果某个库在静态初始化里读了配置、连了网络、装了随机种子，就会出问题，需要把它推迟到运行期：</p>
+<figure class="code-block"><pre><code>--initialize-at-run-time=com.example.legacy.ConfigHolder</code></pre></figure>
+<p>每遇到一个这样的类，就要判断一次“它的静态状态在编译期确定是否安全”。这是纯人工判断，没有捷径。</p>
+<h2 id="我的判断标准"><a class="anchor" href="#我的判断标准" aria-hidden="true">#</a>我的判断标准</h2>
+<p>值得做 native 的情况：</p>
+<ul><li>服务启动频繁（滚动发布密集、需要秒级扩容、跑 Serverless）；</li><li>内存成本敏感，实例数量多；</li><li>逻辑相对单纯，依赖链干净；</li><li>团队能接受“排查工具变弱”这件事。</li></ul>
+<p>不值得做的情况：</p>
+<ul><li>长驻服务，启动时间根本不重要；</li><li>依赖里有一堆运行期增强的库；</li><li>业务逻辑复杂、线上问题多、依赖堆转储定位问题；</li><li>没有额外的 CI 资源预算。</li></ul>
+<h2 id="最后"><a class="anchor" href="#最后" aria-hidden="true">#</a>最后</h2>
+<p>Native Image 给我的最大感受是：<strong>它把成本从运行时搬到了构建时和排查时。</strong> 这不是坏事，只是要清楚自己在交换什么。</p>
+<p>那两个服务里，管理后台至今还在跑 native，因为它的特点是“启动频繁、流量极小、逻辑简单”——几乎是量身定做。而对外 API 那个，半年后我们改回了 JVM 版本，因为一次内存问题排查花了三天，而它在 JVM 上只需要一次堆转储。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#先说数字">先说数字</a></li><li class="toc-l2"><a href="#成本一构建链路要重做">成本一：构建链路要重做</a></li><li class="toc-l2"><a href="#成本二反射资源动态代理都要登记">成本二：反射、资源、动态代理都要登记</a></li><li class="toc-l2"><a href="#成本三aop-与动态代理的边界">成本三：AOP 与动态代理的边界</a></li><li class="toc-l2"><a href="#成本四排查工具基本回到十年前">成本四：排查工具基本回到十年前</a></li><li class="toc-l2"><a href="#成本五构建期初始化">成本五：构建期初始化</a></li><li class="toc-l2"><a href="#我的判断标准">我的判断标准</a></li><li class="toc-l2"><a href="#最后">最后</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">JVM 与性能</p>
+    <p class="area-callout-desc">内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。</p>
+    <a class="btn btn-link" href="../area/jvm.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="observability-micrometer-otel.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">可观测性：从 Micrometer 到 OpenTelemetry</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="ai-assisted-java.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">AI 辅助写 Java：哪些环节真的省时间</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/high-cpu-investigation.html">
+  <div class="post-card-meta">
+    <time datetime="2026-08-30">2026-08-30</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">一次线上 CPU 飙高的排查过程<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Chasing a CPU Spike</p>
+  <p class="post-card-summary">CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/record-sealed-immutability.html">
+  <div class="post-card-meta">
+    <time datetime="2026-05-31">2026-05-31</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">record、sealed 与不可变设计<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Records, Sealed Types, and Immutability</p>
+  <p class="post-card-summary">record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/jdk21-features-in-production.html">
+  <div class="post-card-meta">
+    <time datetime="2025-10-12">2025-10-12</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">JDK 21 的几个新特性，我在生产里用了哪些<span class="badge">待写</span></h3>
+  <p class="post-card-sub">JDK 21 Features I Actually Use</p>
+  <p class="post-card-summary">虚拟线程、record pattern、模式匹配 switch、顺序集合、ScopedValue。有些立刻用上了，有些还在观察，有些暂时不适合。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

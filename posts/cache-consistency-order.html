@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>缓存一致性：先删缓存还是先更新数据库 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="这个经典问题的正确答案不在两个选项里，而在于你愿意接受多长的不一致窗口，以及能不能给它设一个上限。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="缓存一致性：先删缓存还是先更新数据库 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="这个经典问题的正确答案不在两个选项里，而在于你愿意接受多长的不一致窗口，以及能不能给它设一个上限。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/data.html">数据与中间件</a>
+      <a class="badge" href="../tag/redis.html">Redis</a>
+      <span class="badge badge-draft">待写</span>
+    </div>
+    <h1 class="post-title">缓存一致性：先删缓存还是先更新数据库</h1>
+    <p class="post-subtitle">Cache and Database Ordering</p>
+    <p class="post-meta">
+      <time datetime="2024-08-25">2024 年 8 月 25 日</time>
+      
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      <p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>
+      <p>我们试过两种顺序，都在压测里稳定复现了脏数据。最后用的方案是“先更新数据库，再删缓存，并给缓存设一个较短的过期时间兜底”。这篇把每种方案的漏洞窗口画出来对比。</p>
+<h2 id="这篇文章要处理的问题"><a class="anchor" href="#这篇文章要处理的问题" aria-hidden="true">#</a>这篇文章要处理的问题</h2>
+<ul><li>三种常见顺序各自的不一致窗口有多长，触发条件是什么？</li><li>延迟双删在什么情况下有意义，延迟时间怎么定？</li><li>缓存过期时间在这里扮演什么角色，为什么它是最可靠的那一层？</li></ul>
+    </div>
+    
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">数据与中间件</p>
+    <p class="area-callout-desc">MySQL、Redis、消息队列。它们决定了应用层能怎么写、不能怎么写。</p>
+    <a class="btn btn-link" href="../area/data.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="mq-idempotence.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">消息队列的幂等设计</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="mvcc-repeatable-read.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">事务隔离级别与 MVCC：可重复读到底读到了什么</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/sharding-uncovered-queries.html">
+  <div class="post-card-meta">
+    <time datetime="2025-04-27">2025-04-27</time>
+    <span class="sep">·</span><span>数据与中间件</span>
+    
+  </div>
+  <h3 class="post-card-title">分库分表之后，那些被忽略的查询<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Queries You Forgot After Sharding</p>
+  <p class="post-card-summary">分片键选好只是第一步。真正让人头疼的是那些「不带分片键」的查询：分页、统计、导出，还有运营随手提的需求。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/mq-idempotence.html">
+  <div class="post-card-meta">
+    <time datetime="2024-10-13">2024-10-13</time>
+    <span class="sep">·</span><span>数据与中间件</span>
+    
+  </div>
+  <h3 class="post-card-title">消息队列的幂等设计<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Idempotence in Message Queues</p>
+  <p class="post-card-summary">消息队列不做重复投递的承诺，它做的是“至少一次”。所以幂等不是优化项，是使用前提。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/mvcc-repeatable-read.html">
+  <div class="post-card-meta">
+    <time datetime="2024-07-21">2024-07-21</time>
+    <span class="sep">·</span><span>数据与中间件</span>
+    
+  </div>
+  <h3 class="post-card-title">事务隔离级别与 MVCC：可重复读到底读到了什么<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Isolation Levels and MVCC</p>
+  <p class="post-card-summary">快照是什么时候建立的、当前读和快照读的区别，决定了你在同一个事务里会不会看到“两副面孔”的数据。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

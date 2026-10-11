@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>把技术栈当地图，而不是清单 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="把技术栈当地图，而不是清单 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/craft.html">工程与判断</a>
+      <a class="badge" href="../tag/career.html">职业与判断</a>
+      
+    </div>
+    <h1 class="post-title">把技术栈当地图，而不是清单</h1>
+    <p class="post-subtitle">A Map, Not a Checklist</p>
+    <p class="post-meta">
+      <time datetime="2026-10-05">2026 年 10 月 5 日</time>
+      <span class="sep">·</span>约 4 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>我列过一张很长的技术清单：JVM、并发、MySQL、Redis、Spring、消息队列、K8s、分布式事务……每学完一块就打个勾，勾掉一项的时候确实很有成就感。</p>
+<p>但回想那些真正解决问题的时刻，<strong>没有一次是因为“清单上某项已勾选”</strong>。</p>
+<h2 id="清单式知识的三个问题"><a class="anchor" href="#清单式知识的三个问题" aria-hidden="true">#</a>清单式知识的三个问题</h2>
+<p><strong>第一，它只能回答“我会不会”，不能回答“该往哪找”。</strong></p>
+<p>线上出问题的时候，你需要的不是“我学过 GC”，而是“这个现象更像分配速率问题还是内存泄漏”。前者是清单项，后者需要一张能指路的图。</p>
+<p><strong>第二，它依赖别人整理，更新速度跟不上。</strong></p>
+<p>清单往往来自别人的推荐列表，或者某篇文章的目录。这些东西的保质期通常只有一两年，而你的问题每天都在变。</p>
+<p><strong>第三，它最容易变成收藏行为。</strong></p>
+<p>把“收藏了一个系列教程”记成“掌握了这个方向”，是很常见的自我欺骗。清单给人进步的感觉，但进步本身需要别的东西来证明。</p>
+<h2 id="我说的地图是什么"><a class="anchor" href="#我说的地图是什么" aria-hidden="true">#</a>我说的“地图”是什么</h2>
+<p>一张能用的地图，至少包含三种东西：</p>
+<ol><li><strong>主干</strong>：这个领域里不随版本变化的基本机制；</li><li><strong>边界</strong>：这套机制在什么条件下会失效；</li><li><strong>连接</strong>：它和别的领域在哪里接壤。</li></ol>
+<p>举个具体的例子。关于 GC 的地图，我会这样画：</p>
+<div class="table-wrap"><table><thead><tr><th>层</th><th>内容</th></tr></thead><tbody><tr><td>主干</td><td>可达性分析、分代假设、标记-复制 / 标记-整理 / 标记-清除三种基本策略</td></tr><tr><td>边界</td><td>不同收集器的停顿目标不同；容器里要看 limit 而不是只看堆参数；大对象分配有自己的规则</td></tr><tr><td>连接</td><td>停下来的是什么（STW 与安全点）；进程内存与操作系统、cgroup 的关系</td></tr></tbody></table></div>
+<p>有了这张图，遇到“服务每天固定时间卡一下”时，我知道该往哪看：先看 GC 日志里老年代在 GC 后的水位，判断是分配峰值还是回收不掉，再看是不是有定时任务集中创建对象，最后才考虑调参数。</p>
+<p>没有这张图，我能做的只有搜索“Java 卡顿怎么排查”，然后在十几篇互相矛盾的文章里碰运气。</p>
+<h2 id="地图是怎么长出来的"><a class="anchor" href="#地图是怎么长出来的" aria-hidden="true">#</a>地图是怎么长出来的</h2>
+<p>我对自己有效的方法只有一个：<strong>每解决一个问题，就往图上补一个节点。</strong></p>
+<p>具体做法是记三句话：</p>
+<ul><li>现象是什么（下次遇到同样的表现，我能认出来）；</li><li>判断路径是什么（先看什么、再看什么、什么被排除了）；</li><li>结论以及它的适用边界（下次还能不能用）。</li></ul>
+<p>举个例子。MySQL 那张图在我这里最早只有一个节点：<strong>“执行计划里 type=ALL 就意味着全表扫描”</strong>。后来遇到隐式类型转换导致的索引失效，加了一条边：<strong>“等号左边是裸列，才可能用上索引”</strong>。再后来遇到统计信息过期、同一个 SQL 在两个环境表现不同，又加了一条边界：<strong>“估算失真时，先 ANALYZE 再看执行计划”</strong>。</p>
+<p>这张图不是学出来的，是问出来的。每个节点背后都有一次具体的困惑。</p>
+<h2 id="一个检验方法"><a class="anchor" href="#一个检验方法" aria-hidden="true">#</a>一个检验方法</h2>
+<p>区分“清单级”和“地图级”的理解，我用的方法很粗暴：<strong>能不能推导出你没学过的结论。</strong></p>
+<p>比如“线程池为什么队列满了才去创建超过核心数的线程”——如果记住的是结论，换个问法就卡住了；如果记住的是判断顺序（核心数 → 队列 → 最大数 → 拒绝策略），那你就能推出“无界队列会让 maximumPoolSize 失效”这个我没专门学过、但一定成立的结论。</p>
+<p>能推导，说明这块知识挂在了主干上，而不是作为一个孤立的点被记住。</p>
+<h2 id="地图也会过期"><a class="anchor" href="#地图也会过期" aria-hidden="true">#</a>地图也会过期</h2>
+<p>要承认：地图也会过期，只是比清单慢得多。</p>
+<p>参数会变、某个收集器会被移除、框架的推荐做法会调整，这些都会让地图的边缘失效。但主干变化很慢：JMM 的规则、B+ 树的查找方式、TCP 握手，这些东西十几年没怎么变过。</p>
+<p>所以我维护它的方式是：<strong>主干长期不动，边界随版本更新，连接随时补充。</strong> 清单里“已掌握 JVM”那一项，五年后可能是假的；地图上“停顿发生在安全点”这条边，五年后还能用。</p>
+<h2 id="最后"><a class="anchor" href="#最后" aria-hidden="true">#</a>最后</h2>
+<p>写这篇的时候我又看了一眼那张旧清单。它还在我的笔记里，只是很少打开了。</p>
+<p>我不打算删掉它——作为“我还应该学什么”的提醒，它是有价值的。但如果把它当成学习本身，那学到的就只是一个勾选列表。</p>
+<p>真正能带走的东西是：当一个问题出现在你面前时，你知道该往哪个方向走。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#清单式知识的三个问题">清单式知识的三个问题</a></li><li class="toc-l2"><a href="#我说的地图是什么">我说的“地图”是什么</a></li><li class="toc-l2"><a href="#地图是怎么长出来的">地图是怎么长出来的</a></li><li class="toc-l2"><a href="#一个检验方法">一个检验方法</a></li><li class="toc-l2"><a href="#地图也会过期">地图也会过期</a></li><li class="toc-l2"><a href="#最后">最后</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">工程与判断</p>
+    <p class="area-callout-desc">测试、构建、可观测性、代码评审，以及一个工程师如何形成自己的判断。</p>
+    <a class="btn btn-link" href="../area/craft.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="../archive.html">
+      <span class="post-nav-label">回到文章列表</span>
+      <span class="post-nav-title">全部文章</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="judgments-i-keep.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">写了这些年 Java，我保留的几个判断</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card" href="../posts/judgments-i-keep.html">
+  <div class="post-card-meta">
+    <time datetime="2026-09-27">2026-09-27</time>
+    <span class="sep">·</span><span>工程与判断</span>
+    <span class="sep">·</span><span>4 分钟</span>
+  </div>
+  <h3 class="post-card-title">写了这些年 Java，我保留的几个判断</h3>
+  <p class="post-card-sub">Judgments I Still Keep</p>
+  <p class="post-card-summary">大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/from-tools-to-judgment.html">
+  <div class="post-card-meta">
+    <time datetime="2026-07-26">2026-07-26</time>
+    <span class="sep">·</span><span>工程与判断</span>
+    
+  </div>
+  <h3 class="post-card-title">从工具到判断：AI 时代 Java 工程师的价值<span class="badge">待写</span></h3>
+  <p class="post-card-sub">From Tools to Judgment</p>
+  <p class="post-card-summary">模型能写出能跑的代码，但跑起来之后呢？真正拉开差距的是选型、边界、取舍，以及“这件事该不该做”。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/boundary-test-cases.html">
+  <div class="post-card-meta">
+    <time datetime="2026-06-28">2026-06-28</time>
+    <span class="sep">·</span><span>工程与判断</span>
+    
+  </div>
+  <h3 class="post-card-title">边界用例：我为什么还在写那些「没用」的测试<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Boundary Test Cases</p>
+  <p class="post-card-summary">覆盖正常路径的测试让人安心，真正救过命的是那些当时看起来多余的边界用例：空集合、单元素、null 时间戳、跨天、跨时区。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

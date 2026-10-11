@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>写了这些年 Java，我保留的几个判断 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="写了这些年 Java，我保留的几个判断 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/craft.html">工程与判断</a>
+      <a class="badge" href="../tag/career.html">职业与判断</a>
+      
+    </div>
+    <h1 class="post-title">写了这些年 Java，我保留的几个判断</h1>
+    <p class="post-subtitle">Judgments I Still Keep</p>
+    <p class="post-meta">
+      <time datetime="2026-09-27">2026 年 9 月 27 日</time>
+      <span class="sep">·</span>约 4 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>写过的东西里，大部分会过期：某个版本的参数调优建议、某个框架当年的最佳实践、某个库的性能对比。</p>
+<p>但这几年下来，有几条判断一直没被推翻。它们不新鲜，甚至有点像老生常谈，但每一条背后都有一次具体的教训。</p>
+<h2 id="一能读懂比写得巧重要"><a class="anchor" href="#一能读懂比写得巧重要" aria-hidden="true">#</a>一、能读懂比写得巧重要</h2>
+<p>我早年很在意把代码写得“漂亮”：一行 Stream 链处理完整个转换，链式调用一次写完十个操作。</p>
+<p>后来一次事故让我改了看法。一段 12 行的方法，出问题之后我盯着它看了二十分钟才想清楚数据是怎么流的——是我自己三个月前写的。</p>
+<p>现在的标准很土：<strong>这段代码如果不是我写的，我能不能在五分钟内说出它在什么情况下会出错？</strong> 这个标准下，很多“优雅”的写法其实是扣分的：它们把控制流藏进了链式调用里，你得在脑子里展开才能看清分支。</p>
+<p>有一个具体的写法我几乎淘汰了：多层嵌套的 <code>Optional.map().orElseThrow()</code>。不是它错，而是它让“哪一步可能为空、为空之后怎么办”变得需要推理才能看出来。改成几个 <code>if</code> 之后代码长了六行，读起来快了三倍。</p>
+<h2 id="二先量再调"><a class="anchor" href="#二先量再调" aria-hidden="true">#</a>二、先量再调</h2>
+<p>有一次我认定接口慢是因为 JSON 序列化，花了两天换成另一种序列化框架，p99 只降了 3ms。</p>
+<p>后来接上火焰图，发现 60% 的时间花在一次被遗忘的远程校验调用上。</p>
+<p><strong>凭直觉优化的问题不是判断错了，而是你没有能力知道自己判断错了。</strong> 那次之后我给自己定了个规矩：在没有数据之前，不写“性能优化”这四个字。可以先提假设，但验证之前不动手。</p>
+<p>常用的三个手段，按成本从低到高：</p>
+<ol><li>接口级别的耗时拆解（打点，看哪个阶段慢）；</li><li>火焰图（<code>async-profiler</code>，看具体哪个方法吃 CPU）；</li><li>全链路追踪（看是哪一个下游慢）。</li></ol>
+<p>大多数时候第一步就够了。</p>
+<h2 id="三把不确定性挪到看得见的地方"><a class="anchor" href="#三把不确定性挪到看得见的地方" aria-hidden="true">#</a>三、把不确定性挪到看得见的地方</h2>
+<p>这是我这些年最常用的一条。</p>
+<p>系统的复杂度不会因为你设计得聪明而消失。你能做的是决定它出现在哪里：是静默地藏在一个无界队列里，还是明确地表现为一次拒绝、一次超时、一条告警。</p>
+<p>几个具体做法：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 隐式排队 → 显式拒绝：队列有界，溢出走拒绝策略并计数
+new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS,
+        new ArrayBlockingQueue&lt;&gt;(200),
+        namedFactory("report-"),
+        new ThreadPoolExecutor.AbortPolicy());
+
+// 无限等待 → 显式超时：任何跨进程调用都必须有超时
+HttpRequest.newBuilder(uri)
+        .timeout(Duration.ofMillis(800))
+        .build();</code></pre></figure>
+<p>这两行的共同点是：它们把“系统承受不住时会怎样”从一件不确定的事，变成一件可以被观测、被告警、被讨论的事。</p>
+<p>我见过太多故障的根因不是“某个组件坏了”，而是“它坏掉之后的表现没人预料到”。<strong>加一个上限、加一个超时，成本极低，但它把故障从“神秘的偶发问题”变成了“可以读到的日志”。</strong></p>
+<h2 id="四技术选型算的是维护成本"><a class="anchor" href="#四技术选型算的是维护成本" aria-hidden="true">#</a>四、技术选型算的是维护成本</h2>
+<p>选型讨论里最常出现的一句话是“这个用起来很方便”。</p>
+<p>“方便”是真实的收益，但它只是一个季度内的收益。而选型的成本会持续到下一批人接手。</p>
+<p>我们曾经因为“上手快”引入了一个轻量框架，三个月后为了绕过它的边界问题，写了两个适配层；一年后维护这两层的人换成了新同事，每次改动都要先解释一遍为什么这么写。</p>
+<p>现在我会让选型讨论至少回答三个问题：</p>
+<ul><li><strong>谁来维护</strong>？出问题时谁看得懂源码？</li><li><strong>退出成本</strong>是什么？如果半年后要换掉，改动范围有多大？</li><li><strong>团队现在有能力评估它吗</strong>？如果一个东西被认为“很好”但你团队里没人能验证这个判断，那这个判断是借来的。</li></ul>
+<h2 id="五能不能删掉比能不能加上更重要"><a class="anchor" href="#五能不能删掉比能不能加上更重要" aria-hidden="true">#</a>五、能不能删掉比能不能加上更重要</h2>
+<p>我们花了一个季度删掉 11 个几乎没人用的功能。</p>
+<p>删之前，每个功能都有一个理由，而且这些理由当年都是成立的。删之后：发布周期从两周缩到九天，上线后与新功能无关的缺陷降了三分之一，新同事的上手时间从三周变成十天。</p>
+<p>这个结果让我重新理解了“少”的价值。以前我把节制当作一种态度，现在我知道它是一个可验证的工程手段。</p>
+<p>判断一个东西该不该删，我用三个问题：</p>
+<ol><li>如果今天从零开始，还会做它吗？</li><li>现在有哪个<strong>具体的</strong>人在依赖它？</li><li>删掉之后最坏会发生什么，能补救吗？</li></ol>
+<p>第二个问题的关键词是“具体的”。一个“可能有客户在用”的猜测，不值得让一个功能继续占用维护成本。</p>
+<h2 id="这几条判断的共同点"><a class="anchor" href="#这几条判断的共同点" aria-hidden="true">#</a>这几条判断的共同点</h2>
+<p>它们都不涉及具体技术，所以在框架更新的时候不会过期。但它们也确实不高级——写出来甚至有点平淡。</p>
+<p>我想这大概是工程这个领域的常态：<strong>真正能长期保留的判断，往往是那些被具体的账反复验证过的，而不是听起来最聪明的。</strong></p>
+<hr>
+<p>顺便说一句，我删掉过好几版类似的文章。它们写得更漂亮，但里面有几条我自己也没做到。这篇保留下来，是因为这五条我至少都在真实的项目里付出过代价，也都在后来持续用上了。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#一能读懂比写得巧重要">一、能读懂比写得巧重要</a></li><li class="toc-l2"><a href="#二先量再调">二、先量再调</a></li><li class="toc-l2"><a href="#三把不确定性挪到看得见的地方">三、把不确定性挪到看得见的地方</a></li><li class="toc-l2"><a href="#四技术选型算的是维护成本">四、技术选型算的是维护成本</a></li><li class="toc-l2"><a href="#五能不能删掉比能不能加上更重要">五、能不能删掉比能不能加上更重要</a></li><li class="toc-l2"><a href="#这几条判断的共同点">这几条判断的共同点</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">工程与判断</p>
+    <p class="area-callout-desc">测试、构建、可观测性、代码评审，以及一个工程师如何形成自己的判断。</p>
+    <a class="btn btn-link" href="../area/craft.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="tech-stack-as-a-map.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">把技术栈当地图，而不是清单</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="high-cpu-investigation.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">一次线上 CPU 飙高的排查过程</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card" href="../posts/tech-stack-as-a-map.html">
+  <div class="post-card-meta">
+    <time datetime="2026-10-05">2026-10-05</time>
+    <span class="sep">·</span><span>工程与判断</span>
+    <span class="sep">·</span><span>4 分钟</span>
+  </div>
+  <h3 class="post-card-title">把技术栈当地图，而不是清单</h3>
+  <p class="post-card-sub">A Map, Not a Checklist</p>
+  <p class="post-card-summary">清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/from-tools-to-judgment.html">
+  <div class="post-card-meta">
+    <time datetime="2026-07-26">2026-07-26</time>
+    <span class="sep">·</span><span>工程与判断</span>
+    
+  </div>
+  <h3 class="post-card-title">从工具到判断：AI 时代 Java 工程师的价值<span class="badge">待写</span></h3>
+  <p class="post-card-sub">From Tools to Judgment</p>
+  <p class="post-card-summary">模型能写出能跑的代码，但跑起来之后呢？真正拉开差距的是选型、边界、取舍，以及“这件事该不该做”。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/boundary-test-cases.html">
+  <div class="post-card-meta">
+    <time datetime="2026-06-28">2026-06-28</time>
+    <span class="sep">·</span><span>工程与判断</span>
+    
+  </div>
+  <h3 class="post-card-title">边界用例：我为什么还在写那些「没用」的测试<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Boundary Test Cases</p>
+  <p class="post-card-summary">覆盖正常路径的测试让人安心，真正救过命的是那些当时看起来多余的边界用例：空集合、单元素、null 时间戳、跨天、跨时区。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方向 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="方向 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="feed.xml">
+<link rel="stylesheet" href="assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="archive.html">文章</a>
+      <a href="areas.html" aria-current="page">方向</a>
+      <a href="about.html">关于</a>
+      <a href="search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<section class="page-head">
+  <h1>方向</h1>
+  <p>六个方向，也是站内文章的六个入口。点进去可以看到这个方向下的全部文章和细分标签。</p>
+</section>
+
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>JVM 与性能</h2>
+    <span class="area-section-en">JVM &amp; Performance</span>
+  </div>
+  <p class="area-section-desc">内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。</p>
+  <div class="chip-row">
+    <a class="chip" href="tag/jvm.html">JVM<span class="chip-count">8</span></a><a class="chip" href="tag/gc.html">垃圾回收<span class="chip-count">2</span></a><a class="chip" href="tag/performance.html">性能调优<span class="chip-count">7</span></a>
+    <a class="chip chip-ghost" href="area/jvm.html">全部 11 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>并发与多线程</h2>
+    <span class="area-section-en">Concurrency</span>
+  </div>
+  <p class="area-section-desc">线程池、锁、内存模型、虚拟线程，以及那些只在压测流量下才会露头的问题。</p>
+  <div class="chip-row">
+    <a class="chip" href="tag/concurrency.html">并发<span class="chip-count">6</span></a><a class="chip" href="tag/virtual-threads.html">虚拟线程<span class="chip-count">2</span></a>
+    <a class="chip chip-ghost" href="area/concurrency.html">全部 6 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>Spring 与生态</h2>
+    <span class="area-section-en">Spring</span>
+  </div>
+  <p class="area-section-desc">IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。</p>
+  <div class="chip-row">
+    <a class="chip" href="tag/spring.html">Spring<span class="chip-count">3</span></a><a class="chip" href="tag/transaction.html">事务<span class="chip-count">2</span></a>
+    <a class="chip chip-ghost" href="area/spring.html">全部 3 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>数据与中间件</h2>
+    <span class="area-section-en">Data &amp; Middleware</span>
+  </div>
+  <p class="area-section-desc">MySQL、Redis、消息队列。它们决定了应用层能怎么写、不能怎么写。</p>
+  <div class="chip-row">
+    <a class="chip" href="tag/mysql.html">MySQL<span class="chip-count">5</span></a><a class="chip" href="tag/redis.html">Redis<span class="chip-count">1</span></a><a class="chip" href="tag/mq.html">消息队列<span class="chip-count">1</span></a>
+    <a class="chip chip-ghost" href="area/data.html">全部 7 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>分布式与架构</h2>
+    <span class="area-section-en">Distributed Systems</span>
+  </div>
+  <p class="area-section-desc">拆分与合并、一致性、限流熔断、故障隔离——把不确定性放在看得见的地方。</p>
+  <div class="chip-row">
+    <a class="chip" href="tag/microservices.html">微服务<span class="chip-count">4</span></a><a class="chip" href="tag/troubleshooting.html">排查复盘<span class="chip-count">10</span></a>
+    <a class="chip chip-ghost" href="area/architecture.html">全部 4 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>工程与判断</h2>
+    <span class="area-section-en">Engineering Craft</span>
+  </div>
+  <p class="area-section-desc">测试、构建、可观测性、代码评审，以及一个工程师如何形成自己的判断。</p>
+  <div class="chip-row">
+    <a class="chip" href="tag/testing.html">测试<span class="chip-count">2</span></a><a class="chip" href="tag/toolchain.html">构建与工具链<span class="chip-count">2</span></a><a class="chip" href="tag/career.html">职业与判断<span class="chip-count">6</span></a>
+    <a class="chip chip-ghost" href="area/craft.html">全部 9 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="index.html">首页</a><a href="archive.html">文章</a><a href="areas.html">方向</a><a href="about.html">关于</a><a href="search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="area/jvm.html">JVM 与性能</a><a href="area/concurrency.html">并发与多线程</a><a href="area/spring.html">Spring 与生态</a><a href="area/data.html">数据与中间件</a><a href="area/architecture.html">分布式与架构</a><a href="area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="feed.xml">RSS 订阅</a>
+        <a href="about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

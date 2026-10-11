@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>线程池七个参数怎么配：一次排队超时的复盘 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="我们把核心线程数调到和最大线程数一样就上线了，以为万无一失。真正的问题不是线程不够，而是队列把超时藏了起来。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="线程池七个参数怎么配：一次排队超时的复盘 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="我们把核心线程数调到和最大线程数一样就上线了，以为万无一失。真正的问题不是线程不够，而是队列把超时藏了起来。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/concurrency.html">并发与多线程</a>
+      <a class="badge" href="../tag/concurrency.html">并发</a><a class="badge" href="../tag/troubleshooting.html">排查复盘</a>
+      
+    </div>
+    <h1 class="post-title">线程池七个参数怎么配：一次排队超时的复盘</h1>
+    <p class="post-subtitle">Tuning a Thread Pool, and a Timeout Postmortem</p>
+    <p class="post-meta">
+      <time datetime="2024-01-21">2024 年 1 月 21 日</time>
+      <span class="sep">·</span>约 4 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>那个接口的 p99 在业务高峰期会从 80ms 涨到 4 秒，然后恢复，像什么都没发生。监控上线程池的线程数一直是 8，看不出任何异常。</p>
+<h2 id="先把现象摆出来"><a class="anchor" href="#先把现象摆出来" aria-hidden="true">#</a>先把现象摆出来</h2>
+<p>接口做的事很普通：收请求 → 调三个下游 → 聚合。我们用了一个线程池做下游并行调用：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">ThreadPoolExecutor pool = new ThreadPoolExecutor(
+    8, 8, 0L, TimeUnit.MILLISECONDS,
+    new LinkedBlockingQueue&lt;&gt;(),          // 注意这里
+    new ThreadFactoryBuilder().setNameFormat("agg-%d").build(),
+    new ThreadPoolExecutor.AbortPolicy()
+);</code></pre></figure>
+<p>当时我们的判断很朴素：核心数和最大值都设成 8，不会频繁创建线程，队列用无界的，不会丢弃任务。——这套逻辑解释了为什么监控上看不到任何问题，也说明我们对七个参数的理解只停留在字面。</p>
+<h2 id="七个参数里队列是最容易被忽略的那个"><a class="anchor" href="#七个参数里队列是最容易被忽略的那个" aria-hidden="true">#</a>七个参数里，队列是最容易被忽略的那个</h2>
+<p>先复习一下任务提交时的判断顺序：</p>
+<ol><li>当前线程数 &lt; 核心数 → <strong>直接新建线程</strong>执行；</li><li>否则进入队列；</li><li>队列满了，且线程数 &lt; 最大数 → 新建线程；</li><li>队列满了，线程数也到上限 → 走拒绝策略。</li></ol>
+<p>关键在第二步和第三步的顺序：<strong>只有队列满了才会去创建超过核心数的线程。</strong></p>
+<p>所以当队列是 <code>LinkedBlockingQueue</code> 无界时，第三步永远不会发生，<code>maximumPoolSize</code> 实际上是个无效值。任务排在队列里等，超时只发生在调用方的 <code>Future.get(timeout)</code> 上——线程池本身完全“健康”。</p>
+<p>想通这一点之后，现象就能解释了：高峰时 8 个线程在跑，几百个任务静静排队，每个任务都要等前面排完，p99 自然爆掉。</p>
+<h2 id="队列应该多大"><a class="anchor" href="#队列应该多大" aria-hidden="true">#</a>队列应该多大</h2>
+<p>换掉无界队列之后，第二个问题来了：有界队列该设多少？</p>
+<p>一个粗糙但有效的推导方法是先确定“能接受的排队长度”。假设：</p>
+<ul><li>单个任务平均耗时 50ms；</li><li>希望最坏情况下排队等待不超过 2 秒；</li><li>并发 8 个线程。</li></ul>
+<p>那么能容忍的排队长度约等于 <code>2s / 50ms × 8 = 320</code>。这不是精确值，但它把“设一个数”变成了“算一个数”，这个转变很重要——因为一旦你要算，就必须先回答“最坏情况我能接受多久”。</p>
+<p>我们最后用的是 200，配合 <code>AbortPolicy</code> 让溢出立刻暴露，而不是默默堆在内存里。</p>
+<h2 id="核心数怎么定"><a class="anchor" href="#核心数怎么定" aria-hidden="true">#</a>核心数怎么定</h2>
+<p>网上流传的公式是：</p>
+<figure class="code-block"><pre><code>线程数 = CPU 核数 × (1 + 等待时间 / 计算时间)</code></pre></figure>
+<p>它是合理的，因为 IO 等待期间线程不用 CPU。但对于调用下游接口的任务，“等待时间”取决于下游，波动很大，公式给不出稳定答案。</p>
+<p>我现在更愿意用一个经验性的三段式：</p>
+<ol><li><strong>先按核数起步</strong>（比如 8 核 → 16 个线程）；</li><li><strong>压测看两个数</strong>：线程活跃占比和队列长度。线程大多数时间空闲 → 可以减；队列持续增长 → 要么加线程，要么该限流了；</li><li><strong>加到一个临界点就停</strong>：继续加线程但 QPS 不涨，说明瓶颈在别处（下游、数据库连接池、锁）。</li></ol>
+<p>第二点是关键：<strong>线程数不是越大越好，因为每个线程背后往往对应一个数据库连接。</strong> 池子调到 200 而连接池只有 20，多出来的线程只会堆在获取连接的地方。</p>
+<h2 id="还有一种更容易被忽略的问题共用"><a class="anchor" href="#还有一种更容易被忽略的问题共用" aria-hidden="true">#</a>还有一种更容易被忽略的问题：共用</h2>
+<p>我们当时有六个业务共用同一个线程池。好处是省资源，坏处是一个慢业务会把池子占满，让所有业务一起超时——这在复盘里出现过两次，但我们一直以为是“整体容量不够”。</p>
+<p>隔离的成本很低，收益很直接：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 每个业务一个池，名字带业务前缀，出问题时一眼能看到是谁在占线程
+ThreadPoolExecutor reportPool = pools.of("report");
+ThreadPoolExecutor syncPool   = pools.of("sync");</code></pre></figure>
+<p>线程总数不变，但一个业务异常时，其他业务不受影响。顺带说一句，<code>ThreadFactory</code> 里的命名前缀是被低估的排查工具：<code>jstack</code> 出来一眼就能定位。</p>
+<h2 id="拒绝策略要选一个能让你知道的"><a class="anchor" href="#拒绝策略要选一个能让你知道的" aria-hidden="true">#</a>拒绝策略要选一个能让你知道的</h2>
+<p>四种内置策略里，<code>CallerRunsPolicy</code> 常被推荐，因为它天然做了背压——队列满了就让提交任务的线程自己跑。它在批量任务场景很好用，但在 Web 请求线程里会拖慢响应，跟直接拒绝没有本质区别，只是变慢了。</p>
+<p>我的原则是：<strong>默认用 <code>AbortPolicy</code>，一定要接住异常并打日志、记指标。</strong> 静默丢弃是最坏的选择，因为你会同时失去故障现象和故障记录。</p>
+<h2 id="需要盯的四个数"><a class="anchor" href="#需要盯的四个数" aria-hidden="true">#</a>需要盯的四个数</h2>
+<p>改完之后我们加了这几个指标，之后的问题基本都能在读图阶段定位：</p>
+<div class="table-wrap"><table><thead><tr><th>指标</th><th>说明什么</th></tr></thead><tbody><tr><td><code>activeCount / poolSize</code></td><td>线程是否真的忙，判断要不要加线程</td></tr><tr><td><code>queue.size()</code></td><td>队列增长是超时最早的前兆</td></tr><tr><td><code>completedTaskCount</code> 增速</td><td>吞吐是否真的提升</td></tr><tr><td>拒绝次数</td><td>容量不够的硬信号</td></tr></tbody></table></div>
+<p>改完这次之后，那个接口的 p99 稳定在 200ms 以内。回头看，真正解决问题的其实不是“把线程数调大”，而是三件事：给队列设上限、让溢出可见、把业务拆开。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#先把现象摆出来">先把现象摆出来</a></li><li class="toc-l2"><a href="#七个参数里队列是最容易被忽略的那个">七个参数里，队列是最容易被忽略的那个</a></li><li class="toc-l2"><a href="#队列应该多大">队列应该多大</a></li><li class="toc-l2"><a href="#核心数怎么定">核心数怎么定</a></li><li class="toc-l2"><a href="#还有一种更容易被忽略的问题共用">还有一种更容易被忽略的问题：共用</a></li><li class="toc-l2"><a href="#拒绝策略要选一个能让你知道的">拒绝策略要选一个能让你知道的</a></li><li class="toc-l2"><a href="#需要盯的四个数">需要盯的四个数</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">并发与多线程</p>
+    <p class="area-callout-desc">线程池、锁、内存模型、虚拟线程，以及那些只在压测流量下才会露头的问题。</p>
+    <a class="btn btn-link" href="../area/concurrency.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="deadlock-diagnosis.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">死锁排查：三种典型形态与定位方法</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="java-fundamentals-checklist.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">把 Java 基础重新学一遍：我的复习清单</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/structured-concurrency.html">
+  <div class="post-card-meta">
+    <time datetime="2026-03-29">2026-03-29</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">结构化并发：虚拟线程之后的下一个问题<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Structured Concurrency</p>
+  <p class="post-card-summary">虚拟线程解决了“怎么创建很多线程”，结构化并发解决的是“怎么保证它们一起结束、一起失败”。后者更容易写错。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/virtual-threads-what-changed.html">
+  <div class="post-card-meta">
+    <time datetime="2025-07-27">2025-07-27</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    <span class="sep">·</span><span>3 分钟</span>
+  </div>
+  <h3 class="post-card-title">虚拟线程：Loom 改变了什么，没改变什么</h3>
+  <p class="post-card-sub">What Virtual Threads Change</p>
+  <p class="post-card-summary">虚拟线程把「一个请求一个线程」的成本打下来了一个数量级。但它改变不了下游的容量、连接池的大小，也改变不了线程安全这件事。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/aqs-and-reentrantlock.html">
+  <div class="post-card-meta">
+    <time datetime="2024-04-28">2024-04-28</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">AQS 与 ReentrantLock：为什么需要它<span class="badge">待写</span></h3>
+  <p class="post-card-sub">AQS and ReentrantLock</p>
+  <p class="post-card-summary">用 synchronized 能做的事，为什么要再加一套锁？差别在可中断、可超时、可公平——以及它们在有界队列和背压场景里的价值。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

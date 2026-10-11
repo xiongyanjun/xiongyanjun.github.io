@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一次 Full GC 排查：从 GC 日志到堆转储 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="一次 Full GC 排查：从 GC 日志到堆转储 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/jvm.html">JVM 与性能</a>
+      <a class="badge" href="../tag/gc.html">垃圾回收</a><a class="badge" href="../tag/troubleshooting.html">排查复盘</a>
+      
+    </div>
+    <h1 class="post-title">一次 Full GC 排查：从 GC 日志到堆转储</h1>
+    <p class="post-subtitle">A Full GC Investigation</p>
+    <p class="post-meta">
+      <time datetime="2025-02-23">2025 年 2 月 23 日</time>
+      <span class="sep">·</span>约 3 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>告警是这么来的：接口的 p99 每隔两天出现一次尖刺，持续一两秒。看监控，唯一对得上的信号是 Full GC 次数。</p>
+<p>一开始我们的处理是加内存——把堆从 4G 调到 8G。尖刺从两天一次变成四天一次。这说明问题被推迟了，但没有被解决。</p>
+<h2 id="第一步把-gc-日志开起来"><a class="anchor" href="#第一步把-gc-日志开起来" aria-hidden="true">#</a>第一步：把 GC 日志开起来</h2>
+<p>很多团队出事之后才去开日志，其实它应该是默认配置。JDK 9 之后统一用 <code>-Xlog</code>：</p>
+<figure class="code-block"><pre><code>-Xlog:gc*:file=/var/log/app/gc.log:time,uptime,level,tags:filecount=5,filesize=50M</code></pre></figure>
+<p>这条参数的意思是：输出全部 GC 相关日志到文件，包含时间、运行时长、级别和标签，保留 5 个文件、每个最大 50M。<strong><code>time,uptime</code> 这两个标签很关键</strong>——排查时你经常需要把 GC 事件和其他日志对齐。</p>
+<h2 id="第二步从日志里读出是分配太快还是回收不掉"><a class="anchor" href="#第二步从日志里读出是分配太快还是回收不掉" aria-hidden="true">#</a>第二步：从日志里读出“是分配太快还是回收不掉”</h2>
+<p>这是整个排查里最关键的一步。看 Full GC <strong>之后</strong>的老年代占用比例：</p>
+<ul><li>如果 GC 后回落到 20%~30%，然后缓慢上涨到触发阈值 → 分配速率高，或者干脆就是堆太小；</li><li>如果 GC 后仍然停在 60% 以上并且持续上升 → 有对象被长期持有，优先怀疑泄漏。</li></ul>
+<p>我们的日志长这样：</p>
+<figure class="code-block"><pre><code>[2025-02-20T14:31:07.882+0800][info][gc] GC(1841) Pause Full (Allocation Failure)
+  4096M-&gt;2748M(4096M) 1.284s</code></pre></figure>
+<p><code>4096M-&gt;2748M</code> 意味着回收后还占着 2748M，也就是 <strong>67%</strong>。下一次 Full GC 的时候这个数字是 2890M，再下一次 3012M。趋势很明确：有东西在持续堆积。</p>
+<h2 id="第三步先看对象直方图再决定要不要-dump"><a class="anchor" href="#第三步先看对象直方图再决定要不要-dump" aria-hidden="true">#</a>第三步：先看对象直方图，再决定要不要 dump</h2>
+<p>dump 一个 4G 的堆，文件有 4G，用 MAT 打开要十几分钟，而且会触发一次 STW。在它之前，先花十秒钟看直方图：</p>
+<figure class="code-block"><figcaption>bash</figcaption><pre><code class="language-bash"># 注意：:live 会触发一次 Full GC，生产环境慎用
+jcmd 12345 GC.class_histogram | head -30</code></pre></figure>
+<p>输出里按实例数和占用字节排序。我们那次看到的结果很直接：</p>
+<figure class="code-block"><pre><code> num     #instances         #bytes  class name
+----------------------------------------------
+   1:       2314887      740762112  [Ljava.lang.Object;
+   2:       2288014      549123360  java.util.HashMap$Node
+   3:         14022         2837424  [...]</code></pre></figure>
+<p>HashMap 的节点有两百多万个。业务代码里没有一个地方会一次性持有这么多 Map 节点——除非有什么东西在不停地往某个 Map 里塞，而且从来不清理。</p>
+<h2 id="第四步mat-找引用链"><a class="anchor" href="#第四步mat-找引用链" aria-hidden="true">#</a>第四步：MAT 找引用链</h2>
+<p>dump 之后用 MAT 打开，先看 Leak Suspects 报告，再看支配树（Dominator Tree）。这里要看的不是“谁占得最多”，而是<strong>“谁在持有它”</strong>。</p>
+<p>我们的结果指向一个 ThreadLocal：</p>
+<figure class="code-block"><pre><code>Thread (tomcat-exec-3)
+ └─ threadLocals (ThreadLocalMap)
+     └─ entry: TenantContext -&gt; TenantCache
+         └─ HashMap (2,288,014 entries)</code></pre></figure>
+<p>问题清楚了：一个租户维度的本地缓存被塞进了 <code>ThreadLocal</code>。因为 Tomcat 的工作线程是长期存活的，<code>ThreadLocal</code> 里的引用永远不会被回收——<strong>线程不死，ThreadLocal 就不释放</strong>，这正是它比普通缓存危险的地方。</p>
+<h2 id="修法"><a class="anchor" href="#修法" aria-hidden="true">#</a>修法</h2>
+<p>三处改动，缺一不可：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 1. 缓存必须有序：设上限 + 设过期
+Cache&lt;String, Object&gt; tenantCache = Caffeine.newBuilder()
+        .maximumSize(10_000)
+        .expireAfterWrite(Duration.ofMinutes(10))
+        .build();
+
+// 2. ThreadLocal 用完必须清理，用 try-finally 保证
+try {
+    TenantContext.set(tenantId);
+    // ... 业务逻辑
+} finally {
+    TenantContext.clear();
+}
+
+// 3. 更靠谱的做法：在入口统一清理，不依赖每个调用点自觉
+public class TenantFilter implements Filter {
+    public void doFilter(...) {
+        try { chain.doFilter(req, res); }
+        finally { TenantContext.clear(); }   // 线程归还池之前一定清掉
+    }
+}</code></pre></figure>
+<p>第二点和第三点的区别值得强调：<code>try-finally</code> 依赖每个开发者记得写；在 Filter 里统一清理是<strong>结构性保证</strong>。我后来在所有涉及 ThreadLocal 的项目里都要求有这样一个入口清理点。</p>
+<h2 id="改完之后的数字"><a class="anchor" href="#改完之后的数字" aria-hidden="true">#</a>改完之后的数字</h2>
+<p>Full GC 从两天一次变成完全没有——因为堆不再稳步上涨，只有分配高峰期触发的 Young GC。p99 的尖刺消失了。</p>
+<p>回头看，加内存那一步并不算错，它争取了排查时间。但它也差点把我们带偏：如果尖刺从“四天一次”变成“八天一次”，很可能就没人再管它了。</p>
+<h2 id="留下一套检查动作"><a class="anchor" href="#留下一套检查动作" aria-hidden="true">#</a>留下一套检查动作</h2>
+<p>现在遇到 GC 相关的告警，我固定做四件事：</p>
+<ol><li>看 GC 日志里 Full GC <strong>之后</strong>的老年代水位，判断是“分配快”还是“收不掉”；</li><li>看频率和触发原因（<code>Allocation Failure</code> 还是 <code>Metadata GC Threshold</code>）；</li><li>看对象直方图，找数量级异常的类型；</li><li>需要 dump 时优先在测试环境复现，生产环境注意 STW 代价。</li></ol>
+<p>顺便说一个后来加的监控项：<strong>老年代在 GC 后的水位趋势图</strong>。它比“GC 次数”更早暴露问题——次数是结果，水位是原因。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#第一步把-gc-日志开起来">第一步：把 GC 日志开起来</a></li><li class="toc-l2"><a href="#第二步从日志里读出是分配太快还是回收不掉">第二步：从日志里读出“是分配太快还是回收不掉”</a></li><li class="toc-l2"><a href="#第三步先看对象直方图再决定要不要-dump">第三步：先看对象直方图，再决定要不要 dump</a></li><li class="toc-l2"><a href="#第四步mat-找引用链">第四步：MAT 找引用链</a></li><li class="toc-l2"><a href="#修法">修法</a></li><li class="toc-l2"><a href="#改完之后的数字">改完之后的数字</a></li><li class="toc-l2"><a href="#留下一套检查动作">留下一套检查动作</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">JVM 与性能</p>
+    <p class="area-callout-desc">内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。</p>
+    <a class="btn btn-link" href="../area/jvm.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="jit-warmup.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">JIT 预热：为什么压测数据总比线上好看</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="spring-boot-autoconfiguration-order.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">Spring Boot 自动配置的加载顺序与覆盖</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/high-cpu-investigation.html">
+  <div class="post-card-meta">
+    <time datetime="2026-08-30">2026-08-30</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">一次线上 CPU 飙高的排查过程<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Chasing a CPU Spike</p>
+  <p class="post-card-summary">CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/record-sealed-immutability.html">
+  <div class="post-card-meta">
+    <time datetime="2026-05-31">2026-05-31</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    
+  </div>
+  <h3 class="post-card-title">record、sealed 与不可变设计<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Records, Sealed Types, and Immutability</p>
+  <p class="post-card-summary">record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/graalvm-native-image-cost.html">
+  <div class="post-card-meta">
+    <time datetime="2026-01-18">2026-01-18</time>
+    <span class="sep">·</span><span>JVM 与性能</span>
+    <span class="sep">·</span><span>4 分钟</span>
+  </div>
+  <h3 class="post-card-title">GraalVM Native Image 在 Spring Boot 3 上的成本清单</h3>
+  <p class="post-card-sub">The Real Cost of Native Image</p>
+  <p class="post-card-summary">启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

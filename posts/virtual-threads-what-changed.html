@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>虚拟线程：Loom 改变了什么，没改变什么 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="虚拟线程把「一个请求一个线程」的成本打下来了一个数量级。但它改变不了下游的容量、连接池的大小，也改变不了线程安全这件事。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="虚拟线程：Loom 改变了什么，没改变什么 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="虚拟线程把「一个请求一个线程」的成本打下来了一个数量级。但它改变不了下游的容量、连接池的大小，也改变不了线程安全这件事。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/concurrency.html">并发与多线程</a>
+      <a class="badge" href="../tag/virtual-threads.html">虚拟线程</a><a class="badge" href="../tag/concurrency.html">并发</a>
+      
+    </div>
+    <h1 class="post-title">虚拟线程：Loom 改变了什么，没改变什么</h1>
+    <p class="post-subtitle">What Virtual Threads Change</p>
+    <p class="post-meta">
+      <time datetime="2025-07-27">2025 年 7 月 27 日</time>
+      <span class="sep">·</span>约 3 分钟
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>那个服务做的事很简单：收到请求，并行调三个下游，聚合结果返回。每个请求的耗时里，95% 是等下游。</p>
+<p>平台线程方案下，我们用了一个 200 线程的池子，压测到四千 QPS 就上不去了——线程全部阻塞在等待响应上，新请求开始排队。</p>
+<h2 id="换法本身很简单"><a class="anchor" href="#换法本身很简单" aria-hidden="true">#</a>换法本身很简单</h2>
+<p>JDK 21 的改法几乎没有成本：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 改造前：固定线程池，200 是猜出来的容量上限
+ExecutorService pool = Executors.newFixedThreadPool(200);
+
+// 改造后：一个任务一个虚拟线程，随用随建
+ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+
+// 临时挂起用法，适合少量任务
+Thread.ofVirtual().name("agg-", 0).start(() -&gt; callDownstream());</code></pre></figure>
+<p>改动就是一行。压测结果是这样：</p>
+<div class="table-wrap"><table><thead><tr><th>指标</th><th>平台线程 200</th><th>虚拟线程</th></tr></thead><tbody><tr><td>线程数</td><td>200（固定）</td><td>峰值约 3 万</td></tr><tr><td>平台线程占用</td><td>200</td><td>8</td></tr><tr><td>吞吐</td><td>4,000 QPS</td><td>4,600 QPS</td></tr><tr><td>p99</td><td>4.2s（排队后）</td><td>3.6s</td></tr><tr><td>单请求内存开销</td><td>约 1MB 栈</td><td>数 KB 起，按需增长</td></tr></tbody></table></div>
+<p>吞吐只涨了 15%，这个数字比社区里“提升十倍”的说法保守得多，但它才是这个场景的真实情况：<strong>因为瓶颈不在应用层的线程上。</strong></p>
+<h2 id="没改变的第一件事下游容量"><a class="anchor" href="#没改变的第一件事下游容量" aria-hidden="true">#</a>没改变的第一件事：下游容量</h2>
+<p>我们的三个下游里有两个是数据库，连接池各 20 个。虚拟线程只能让“等待”这件事变便宜，它没法让数据库多接连接。</p>
+<p>一旦应用层不再排队，请求会更快地涌向下游，结果是压力从“线程池排队”转移到了“连接池排队”——甚至可能更糟，因为你不再有应用层作为缓冲。</p>
+<p>所以我把这套改动和另外两件事绑在一起做：</p>
+<ol><li>给下游调用加<strong>显式超时</strong>，而不是依赖线程池排队来限制并发；</li><li>用<strong>信号量或限流器</strong>在应用层限制对每个下游的并发数。</li></ol>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 虚拟线程不等于无限并发：下游并发仍然要受限
+private final Semaphore dbGuard = new Semaphore(20);
+
+String query(String sql) throws Exception {
+    dbGuard.acquire();
+    try {
+        return jdbcTemplate.queryForObject(sql, String.class);
+    } finally {
+        dbGuard.release();
+    }
+}</code></pre></figure>
+<h2 id="没改变的第二件事线程安全"><a class="anchor" href="#没改变的第二件事线程安全" aria-hidden="true">#</a>没改变的第二件事：线程安全</h2>
+<p>虚拟线程依然是线程，共享可变状态依然要同步。这两件事不会因为线程变便宜而变简单——反而更危险，因为现在有两万个线程在跑同一段代码，以前被低并发掩盖的竞态会突然暴露出来。</p>
+<p>迁移时最容易踩的是 <code>ThreadLocal</code>：</p>
+<figure class="code-block"><figcaption>java</figcaption><pre><code class="language-java">// 平台线程时代：100 个线程 × 1KB = 100KB，可以忽略
+// 虚拟线程时代：3 万个线程 × 1KB = 30MB，而且每个都是从同一个思路来的
+private static final ThreadLocal&lt;SimpleDateFormat&gt; FMT =
+        ThreadLocal.withInitial(SimpleDateFormat::new);</code></pre></figure>
+<p>虚拟线程是“用完即弃”的，这意味着 <code>ThreadLocal</code> 里的数据几乎没有机会被复用命中——它带来的只有成本，没有收益。这类代码应该直接换成 <code>DateTimeFormatter</code>（线程安全、不可变）。</p>
+<h2 id="没改变的第三件事cpu-密集没有收益"><a class="anchor" href="#没改变的第三件事cpu-密集没有收益" aria-hidden="true">#</a>没改变的第三件事：CPU 密集没有收益</h2>
+<p>虚拟线程的价值在于“阻塞时让出载体线程”。如果任务根本不阻塞，只是纯计算，那它和平台线程没有区别，还会额外引入调度开销。<strong>CPU 密集的任务继续用平台线程池。</strong></p>
+<p>还有一个 JDK 21 的限制值得知道：在 <code>synchronized</code> 块里做阻塞操作时，虚拟线程会占住载体线程（社区里叫 pinning），此时它就退化成一个平台线程。判断方式很直接——如果阻塞式 IO 外面套着 <code>synchronized</code>，换成 <code>ReentrantLock</code> 通常就能解决。后续 JDK 版本在这方面持续改进，迁移前值得确认一下目标版本的状态。</p>
+<h2 id="排查方式也要换"><a class="anchor" href="#排查方式也要换" aria-hidden="true">#</a>排查方式也要换</h2>
+<p>虚拟线程不会出现在 <code>jstack</code> 的常规输出里，需要换个命令：</p>
+<figure class="code-block"><figcaption>bash</figcaption><pre><code class="language-bash">jcmd &lt;pid&gt; Thread.dump_to_file -format=json /tmp/threads.json</code></pre></figure>
+<p>这一点在迁移初期特别容易被忽略：出了线上问题，习惯性地执行 <code>jstack</code>，看到线程数一切正常，然后开始怀疑人生。</p>
+<h2 id="我现在怎么判断要不要迁移"><a class="anchor" href="#我现在怎么判断要不要迁移" aria-hidden="true">#</a>我现在怎么判断要不要迁移</h2>
+<p>满足这三条时，收益明显：</p>
+<ul><li>任务以阻塞等待为主（下游调用、文件 IO、外部 API）；</li><li>并发上限现在是被线程池卡住的，而不是被下游卡住的；</li><li>代码里没有大范围依赖 <code>ThreadLocal</code> 或 <code>synchronized</code> 包阻塞调用。</li></ul>
+<p>反过来，如果服务已经在 CPU 上打满，或者瓶颈明确在数据库上，那迁移过去只是把相同的压力换个地方排队。</p>
+<p>虚拟线程是一次实实在在的成本降低。但成本降低之后，问题会更诚实地暴露出来——它们本来就在那儿。</p>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#换法本身很简单">换法本身很简单</a></li><li class="toc-l2"><a href="#没改变的第一件事下游容量">没改变的第一件事：下游容量</a></li><li class="toc-l2"><a href="#没改变的第二件事线程安全">没改变的第二件事：线程安全</a></li><li class="toc-l2"><a href="#没改变的第三件事cpu-密集没有收益">没改变的第三件事：CPU 密集没有收益</a></li><li class="toc-l2"><a href="#排查方式也要换">排查方式也要换</a></li><li class="toc-l2"><a href="#我现在怎么判断要不要迁移">我现在怎么判断要不要迁移</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">并发与多线程</p>
+    <p class="area-callout-desc">线程池、锁、内存模型、虚拟线程，以及那些只在压测流量下才会露头的问题。</p>
+    <a class="btn btn-link" href="../area/concurrency.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="gateway-rate-limiting.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">网关限流：Sentinel 之外的选择</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="what-mocks-really-test.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">Mock 到底在测什么</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/structured-concurrency.html">
+  <div class="post-card-meta">
+    <time datetime="2026-03-29">2026-03-29</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">结构化并发：虚拟线程之后的下一个问题<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Structured Concurrency</p>
+  <p class="post-card-summary">虚拟线程解决了“怎么创建很多线程”，结构化并发解决的是“怎么保证它们一起结束、一起失败”。后者更容易写错。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/aqs-and-reentrantlock.html">
+  <div class="post-card-meta">
+    <time datetime="2024-04-28">2024-04-28</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">AQS 与 ReentrantLock：为什么需要它<span class="badge">待写</span></h3>
+  <p class="post-card-sub">AQS and ReentrantLock</p>
+  <p class="post-card-summary">用 synchronized 能做的事，为什么要再加一套锁？差别在可中断、可超时、可公平——以及它们在有界队列和背压场景里的价值。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/completablefuture-exceptions.html">
+  <div class="post-card-meta">
+    <time datetime="2024-03-24">2024-03-24</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">CompletableFuture 的异常处理陷阱<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Exception Handling in CompletableFuture</p>
+  <p class="post-card-summary">忘了 get 的 CompletableFuture，异常会像不存在一样消失。异步链路里“错误被吞掉”是默认行为，不是意外。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

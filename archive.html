@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文章 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="文章 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="feed.xml">
+<link rel="stylesheet" href="assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="archive.html" aria-current="page">文章</a>
+      <a href="areas.html">方向</a>
+      <a href="about.html">关于</a>
+      <a href="search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<section class="page-head">
+  <h1>文章</h1>
+  <p>共 40 篇，按时间倒序。带“待写”标记的是已经定题、正文还在写作中的篇目。</p>
+</section>
+<div class="archive-body">
+  <section class="year-block" id="y2026">
+    <div class="year-head">
+      <h2 class="year-num">2026</h2>
+      <span class="year-count">10 篇</span>
+    </div>
+    <div class="row-list">
+<a class="row-item" href="posts/tech-stack-as-a-map.html">
+  <time datetime="2026-10-05">2026-10-05</time>
+  <span class="row-title">把技术栈当地图，而不是清单</span>
+  <span class="row-summary">清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item" href="posts/judgments-i-keep.html">
+  <time datetime="2026-09-27">2026-09-27</time>
+  <span class="row-title">写了这些年 Java，我保留的几个判断</span>
+  <span class="row-summary">大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/high-cpu-investigation.html">
+  <time datetime="2026-08-30">2026-08-30</time>
+  <span class="row-title">一次线上 CPU 飙高的排查过程<span class="badge">待写</span></span>
+  <span class="row-summary">CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/from-tools-to-judgment.html">
+  <time datetime="2026-07-26">2026-07-26</time>
+  <span class="row-title">从工具到判断：AI 时代 Java 工程师的价值<span class="badge">待写</span></span>
+  <span class="row-summary">模型能写出能跑的代码，但跑起来之后呢？真正拉开差距的是选型、边界、取舍，以及“这件事该不该做”。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/boundary-test-cases.html">
+  <time datetime="2026-06-28">2026-06-28</time>
+  <span class="row-title">边界用例：我为什么还在写那些「没用」的测试<span class="badge">待写</span></span>
+  <span class="row-summary">覆盖正常路径的测试让人安心，真正救过命的是那些当时看起来多余的边界用例：空集合、单元素、null 时间戳、跨天、跨时区。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/record-sealed-immutability.html">
+  <time datetime="2026-05-31">2026-05-31</time>
+  <span class="row-title">record、sealed 与不可变设计<span class="badge">待写</span></span>
+  <span class="row-summary">record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/merging-services-back.html">
+  <time datetime="2026-04-26">2026-04-26</time>
+  <span class="row-title">我们把服务重新合并回了单体<span class="badge">待写</span></span>
+  <span class="row-summary">一年半前拆出去的三个服务又合回来了。不是因为微服务不好，而是我们拆的三个边界，恰好都是每天都在变的那部分。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item is-draft" href="posts/structured-concurrency.html">
+  <time datetime="2026-03-29">2026-03-29</time>
+  <span class="row-title">结构化并发：虚拟线程之后的下一个问题<span class="badge">待写</span></span>
+  <span class="row-summary">虚拟线程解决了“怎么创建很多线程”，结构化并发解决的是“怎么保证它们一起结束、一起失败”。后者更容易写错。</span>
+  <span class="row-area">并发与多线程</span>
+</a>
+<a class="row-item is-draft" href="posts/observability-micrometer-otel.html">
+  <time datetime="2026-02-22">2026-02-22</time>
+  <span class="row-title">可观测性：从 Micrometer 到 OpenTelemetry<span class="badge">待写</span></span>
+  <span class="row-summary">指标、日志、链路三件套各自解决不同问题。真正难的不是接入，而是决定什么值得被记录下来。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item" href="posts/graalvm-native-image-cost.html">
+  <time datetime="2026-01-18">2026-01-18</time>
+  <span class="row-title">GraalVM Native Image 在 Spring Boot 3 上的成本清单</span>
+  <span class="row-summary">启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。</span>
+  <span class="row-area">JVM 与性能</span>
+</a></div>
+  </section>
+  <section class="year-block" id="y2025">
+    <div class="year-head">
+      <h2 class="year-num">2025</h2>
+      <span class="year-count">10 篇</span>
+    </div>
+    <div class="row-list">
+<a class="row-item is-draft" href="posts/ai-assisted-java.html">
+  <time datetime="2025-12-28">2025-12-28</time>
+  <span class="row-title">AI 辅助写 Java：哪些环节真的省时间<span class="badge">待写</span></span>
+  <span class="row-summary">在写样板代码、翻源码、写测试数据上确实省时间。在排查问题和做设计判断上，它更多是提供线索，而不是给答案。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/jdk21-features-in-production.html">
+  <time datetime="2025-10-12">2025-10-12</time>
+  <span class="row-title">JDK 21 的几个新特性，我在生产里用了哪些<span class="badge">待写</span></span>
+  <span class="row-summary">虚拟线程、record pattern、模式匹配 switch、顺序集合、ScopedValue。有些立刻用上了，有些还在观察，有些暂时不适合。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/gateway-rate-limiting.html">
+  <time datetime="2025-08-31">2025-08-31</time>
+  <span class="row-title">网关限流：Sentinel 之外的选择<span class="badge">待写</span></span>
+  <span class="row-summary">限流器本身不难写，难的是决定限在哪个维度、阈值是多少、被限的请求返回什么。工具选择只占这件事的一小部分。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item" href="posts/virtual-threads-what-changed.html">
+  <time datetime="2025-07-27">2025-07-27</time>
+  <span class="row-title">虚拟线程：Loom 改变了什么，没改变什么</span>
+  <span class="row-summary">虚拟线程把「一个请求一个线程」的成本打下来了一个数量级。但它改变不了下游的容量、连接池的大小，也改变不了线程安全这件事。</span>
+  <span class="row-area">并发与多线程</span>
+</a>
+<a class="row-item is-draft" href="posts/what-mocks-really-test.html">
+  <time datetime="2025-06-29">2025-06-29</time>
+  <span class="row-title">Mock 到底在测什么<span class="badge">待写</span></span>
+  <span class="row-summary">过度 mock 的测试其实在测实现细节：你换一种写法，测试就红了，但行为没变。这类测试的成本远高于它的价值。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/idempotent-retry-timeout.html">
+  <time datetime="2025-05-31">2025-05-31</time>
+  <span class="row-title">幂等、重试与超时：分布式调用的三个默认值<span class="badge">待写</span></span>
+  <span class="row-summary">每一个跨服务调用都应该显式回答三个问题：超时多久、失败重试几次、重复执行会怎样。默认值通常都不是你能接受的那个。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item is-draft" href="posts/sharding-uncovered-queries.html">
+  <time datetime="2025-04-27">2025-04-27</time>
+  <span class="row-title">分库分表之后，那些被忽略的查询<span class="badge">待写</span></span>
+  <span class="row-summary">分片键选好只是第一步。真正让人头疼的是那些「不带分片键」的查询：分页、统计、导出，还有运营随手提的需求。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item is-draft" href="posts/jit-warmup.html">
+  <time datetime="2025-03-30">2025-03-30</time>
+  <span class="row-title">JIT 预热：为什么压测数据总比线上好看<span class="badge">待写</span></span>
+  <span class="row-summary">压测跑十分钟得到的数字，和线上跑一整天得到的数字不是同一件事。解释执行、C1、C2 三个阶段的表现差异很大。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item" href="posts/full-gc-investigation.html">
+  <time datetime="2025-02-23">2025-02-23</time>
+  <span class="row-title">一次 Full GC 排查：从 GC 日志到堆转储</span>
+  <span class="row-summary">服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/spring-boot-autoconfiguration-order.html">
+  <time datetime="2025-01-19">2025-01-19</time>
+  <span class="row-title">Spring Boot 自动配置的加载顺序与覆盖<span class="badge">待写</span></span>
+  <span class="row-summary">我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。</span>
+  <span class="row-area">Spring 与生态</span>
+</a></div>
+  </section>
+  <section class="year-block" id="y2024">
+    <div class="year-head">
+      <h2 class="year-num">2024</h2>
+      <span class="year-count">10 篇</span>
+    </div>
+    <div class="row-list">
+<a class="row-item is-draft" href="posts/how-we-broke-a-monolith.html">
+  <time datetime="2024-12-30">2024-12-30</time>
+  <span class="row-title">微服务拆分：我们是怎么把一个单体拆坏的<span class="badge">待写</span></span>
+  <span class="row-summary">拆分之后发布变快了，但一次下单要跨七个服务、九个网络调用。我们把耦合从代码里搬到了网络上，然后发现网络没有事务。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item is-draft" href="posts/mq-idempotence.html">
+  <time datetime="2024-10-13">2024-10-13</time>
+  <span class="row-title">消息队列的幂等设计<span class="badge">待写</span></span>
+  <span class="row-summary">消息队列不做重复投递的承诺，它做的是“至少一次”。所以幂等不是优化项，是使用前提。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item is-draft" href="posts/cache-consistency-order.html">
+  <time datetime="2024-08-25">2024-08-25</time>
+  <span class="row-title">缓存一致性：先删缓存还是先更新数据库<span class="badge">待写</span></span>
+  <span class="row-summary">这个经典问题的正确答案不在两个选项里，而在于你愿意接受多长的不一致窗口，以及能不能给它设一个上限。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item is-draft" href="posts/mvcc-repeatable-read.html">
+  <time datetime="2024-07-21">2024-07-21</time>
+  <span class="row-title">事务隔离级别与 MVCC：可重复读到底读到了什么<span class="badge">待写</span></span>
+  <span class="row-summary">快照是什么时候建立的、当前读和快照读的区别，决定了你在同一个事务里会不会看到“两副面孔”的数据。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item" href="posts/mysql-index-not-used.html">
+  <time datetime="2024-06-23">2024-06-23</time>
+  <span class="row-title">MySQL 索引失效：十个真实出现过的写法</span>
+  <span class="row-summary">索引失效的说法不准确，更准确的描述是“优化器认为走索引不划算”。这十个写法都来自真实代码，每个都附了执行计划的变化和改法。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item is-draft" href="posts/how-i-read-code-in-review.html">
+  <time datetime="2024-05-26">2024-05-26</time>
+  <span class="row-title">代码评审：我现在怎么看一段代码<span class="badge">待写</span></span>
+  <span class="row-summary">我不再从头读到尾，而是先看这次改动会在什么条件下出错，再看它有没有把出错这件事写清楚。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/aqs-and-reentrantlock.html">
+  <time datetime="2024-04-28">2024-04-28</time>
+  <span class="row-title">AQS 与 ReentrantLock：为什么需要它<span class="badge">待写</span></span>
+  <span class="row-summary">用 synchronized 能做的事，为什么要再加一套锁？差别在可中断、可超时、可公平——以及它们在有界队列和背压场景里的价值。</span>
+  <span class="row-area">并发与多线程</span>
+</a>
+<a class="row-item is-draft" href="posts/completablefuture-exceptions.html">
+  <time datetime="2024-03-24">2024-03-24</time>
+  <span class="row-title">CompletableFuture 的异常处理陷阱<span class="badge">待写</span></span>
+  <span class="row-summary">忘了 get 的 CompletableFuture，异常会像不存在一样消失。异步链路里“错误被吞掉”是默认行为，不是意外。</span>
+  <span class="row-area">并发与多线程</span>
+</a>
+<a class="row-item is-draft" href="posts/deadlock-diagnosis.html">
+  <time datetime="2024-02-18">2024-02-18</time>
+  <span class="row-title">死锁排查：三种典型形态与定位方法<span class="badge">待写</span></span>
+  <span class="row-summary">应用死锁、数据库死锁、线程池饥饿，三种问题的现象很像，排查入口完全不同。先把它们分开，再谈工具。</span>
+  <span class="row-area">并发与多线程</span>
+</a>
+<a class="row-item" href="posts/thread-pool-tuning.html">
+  <time datetime="2024-01-21">2024-01-21</time>
+  <span class="row-title">线程池七个参数怎么配：一次排队超时的复盘</span>
+  <span class="row-summary">我们把核心线程数调到和最大线程数一样就上线了，以为万无一失。真正的问题不是线程不够，而是队列把超时藏了起来。</span>
+  <span class="row-area">并发与多线程</span>
+</a></div>
+  </section>
+  <section class="year-block" id="y2023">
+    <div class="year-head">
+      <h2 class="year-num">2023</h2>
+      <span class="year-count">10 篇</span>
+    </div>
+    <div class="row-list">
+<a class="row-item is-draft" href="posts/java-fundamentals-checklist.html">
+  <time datetime="2023-12-29">2023-12-29</time>
+  <span class="row-title">把 Java 基础重新学一遍：我的复习清单<span class="badge">待写</span></span>
+  <span class="row-summary">工作中用不到的语法，长期不用就会变成“以为自己懂”。我按“能不能推导出结论”而不是“能不能背出答案”整理了一份清单。</span>
+  <span class="row-area">工程与判断</span>
+</a>
+<a class="row-item is-draft" href="posts/connection-pool-leak.html">
+  <time datetime="2023-11-06">2023-11-06</time>
+  <span class="row-title">连接池参数怎么配：一次连接泄漏的排查<span class="badge">待写</span></span>
+  <span class="row-summary">连接池的两个数字要分开看：池子大小决定吞吐上限，泄漏检测决定你什么时候知道出事。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item is-draft" href="posts/mybatis-one-to-many-duplicated-rows.html">
+  <time datetime="2023-09-24">2023-09-24</time>
+  <span class="row-title">MyBatis 一对多映射为什么返回重复行<span class="badge">待写</span></span>
+  <span class="row-summary">join 之后一对多会变成笛卡尔积，MyBatis 靠 `&lt;id&gt;` 标签做去重。漏写 id 映射时，你会得到一堆“看起来一样但对象不同”的记录。</span>
+  <span class="row-area">数据与中间件</span>
+</a>
+<a class="row-item is-draft" href="posts/transactional-not-working.html">
+  <time datetime="2023-08-20">2023-08-20</time>
+  <span class="row-title">@Transactional 失效的几种场景<span class="badge">待写</span></span>
+  <span class="row-summary">事务失效最麻烦的地方是它不报错。方法正常返回、日志正常打印、数据就是没回滚。这篇按触发条件整理常见场景和验证方式。</span>
+  <span class="row-area">Spring 与生态</span>
+</a>
+<a class="row-item" href="posts/spring-circular-dependency.html">
+  <time datetime="2023-07-16">2023-07-16</time>
+  <span class="row-title">Spring 循环依赖：三级缓存到底解决了什么</span>
+  <span class="row-summary">三级缓存不是为了“提前暴露对象”这么简单，它解决的是 AOP 场景下代理对象什么时候创建的问题。搞懂这一点，才能解释构造器注入为什么救不了循环依赖。</span>
+  <span class="row-area">Spring 与生态</span>
+</a>
+<a class="row-item is-draft" href="posts/g1-or-zgc.html">
+  <time datetime="2023-06-11">2023-06-11</time>
+  <span class="row-title">G1 还是 ZGC：怎么为一个服务选垃圾收集器<span class="badge">待写</span></span>
+  <span class="row-summary">选收集器不是选“最先进的那个”，而是先回答三个问题：延迟目标多少、堆多大、机器还有多少余量。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/off-heap-memory-oom.html">
+  <time datetime="2023-04-23">2023-04-23</time>
+  <span class="row-title">堆外内存：为什么 OOM 的时候堆看起来很健康<span class="badge">待写</span></span>
+  <span class="row-summary">容器被 OOM Killer 杀掉，堆内存曲线却一路平稳。堆外内存、元空间、线程栈、DirectByteBuffer 都在堆的账本之外。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/classloader-and-delegation.html">
+  <time datetime="2023-03-19">2023-03-19</time>
+  <span class="row-title">类加载与双亲委派：从一次 NoClassDefFoundError 说起<span class="badge">待写</span></span>
+  <span class="row-summary">同一个类被两个加载器加载，就会变成两个不同的类型。所有“类转换异常”和静态变量不共享的怪事，源头都在这里。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item is-draft" href="posts/hashmap-capacity-power-of-two.html">
+  <time datetime="2023-02-26">2023-02-26</time>
+  <span class="row-title">HashMap 扩容为什么必须是 2 的幂<span class="badge">待写</span></span>
+  <span class="row-summary">不是说“位运算更快”就完了。2 的幂真正决定的是桶下标的计算方式和扩容时的元素迁移成本。</span>
+  <span class="row-area">JVM 与性能</span>
+</a>
+<a class="row-item" href="posts/jdk8-to-jdk17-upgrade.html">
+  <time datetime="2023-01-15">2023-01-15</time>
+  <span class="row-title">从 JDK 8 升到 JDK 17：一次真实升级里踩到的坑</span>
+  <span class="row-summary">一个跑了六年的服务，从 JDK 8 升到 17 花了三周。真正的成本不在语言特性上，而在那些依赖了内部 API、GC 参数和旧字节码工具的地方。</span>
+  <span class="row-area">JVM 与性能</span>
+</a></div>
+  </section></div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="index.html">首页</a><a href="archive.html">文章</a><a href="areas.html">方向</a><a href="about.html">关于</a><a href="search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="area/jvm.html">JVM 与性能</a><a href="area/concurrency.html">并发与多线程</a><a href="area/spring.html">Spring 与生态</a><a href="area/data.html">数据与中间件</a><a href="area/architecture.html">分布式与架构</a><a href="area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="feed.xml">RSS 订阅</a>
+        <a href="about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

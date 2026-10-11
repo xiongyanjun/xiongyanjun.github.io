@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CompletableFuture 的异常处理陷阱 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="忘了 get 的 CompletableFuture，异常会像不存在一样消失。异步链路里“错误被吞掉”是默认行为，不是意外。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="CompletableFuture 的异常处理陷阱 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="忘了 get 的 CompletableFuture，异常会像不存在一样消失。异步链路里“错误被吞掉”是默认行为，不是意外。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/concurrency.html">并发与多线程</a>
+      <a class="badge" href="../tag/concurrency.html">并发</a>
+      <span class="badge badge-draft">待写</span>
+    </div>
+    <h1 class="post-title">CompletableFuture 的异常处理陷阱</h1>
+    <p class="post-subtitle">Exception Handling in CompletableFuture</p>
+    <p class="post-meta">
+      <time datetime="2024-03-24">2024 年 3 月 24 日</time>
+      
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      <p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>
+      <p>一次批量任务里，三分之一的记录静默丢失，日志干净得像什么都没发生。原因是 <code>thenApply</code> 里抛出的异常没有落到任何 <code>exceptionally</code> 分支。这篇按“异常去哪了”梳理 API 的行为差异。</p>
+<h2 id="这篇文章要处理的问题"><a class="anchor" href="#这篇文章要处理的问题" aria-hidden="true">#</a>这篇文章要处理的问题</h2>
+<ul><li><code>thenApply</code> / <code>thenCompose</code> / <code>handle</code> / <code>whenComplete</code> 在异常传播上有什么不同？</li><li>怎样为整条异步链路设置兜底，而不是给每一步都加 try-catch？</li><li>自定义线程池和默认 <code>ForkJoinPool.commonPool()</code> 混用会带来什么问题？</li></ul>
+    </div>
+    
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">并发与多线程</p>
+    <p class="area-callout-desc">线程池、锁、内存模型、虚拟线程，以及那些只在压测流量下才会露头的问题。</p>
+    <a class="btn btn-link" href="../area/concurrency.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="aqs-and-reentrantlock.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">AQS 与 ReentrantLock：为什么需要它</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="deadlock-diagnosis.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">死锁排查：三种典型形态与定位方法</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/structured-concurrency.html">
+  <div class="post-card-meta">
+    <time datetime="2026-03-29">2026-03-29</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">结构化并发：虚拟线程之后的下一个问题<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Structured Concurrency</p>
+  <p class="post-card-summary">虚拟线程解决了“怎么创建很多线程”，结构化并发解决的是“怎么保证它们一起结束、一起失败”。后者更容易写错。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/virtual-threads-what-changed.html">
+  <div class="post-card-meta">
+    <time datetime="2025-07-27">2025-07-27</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    <span class="sep">·</span><span>3 分钟</span>
+  </div>
+  <h3 class="post-card-title">虚拟线程：Loom 改变了什么，没改变什么</h3>
+  <p class="post-card-sub">What Virtual Threads Change</p>
+  <p class="post-card-summary">虚拟线程把「一个请求一个线程」的成本打下来了一个数量级。但它改变不了下游的容量、连接池的大小，也改变不了线程安全这件事。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/aqs-and-reentrantlock.html">
+  <div class="post-card-meta">
+    <time datetime="2024-04-28">2024-04-28</time>
+    <span class="sep">·</span><span>并发与多线程</span>
+    
+  </div>
+  <h3 class="post-card-title">AQS 与 ReentrantLock：为什么需要它<span class="badge">待写</span></h3>
+  <p class="post-card-sub">AQS and ReentrantLock</p>
+  <p class="post-card-summary">用 synchronized 能做的事，为什么要再加一套锁？差别在可中断、可超时、可公平——以及它们在有界队列和背压场景里的价值。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring Boot 自动配置的加载顺序与覆盖 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="Spring Boot 自动配置的加载顺序与覆盖 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/spring.html">Spring 与生态</a>
+      <a class="badge" href="../tag/spring.html">Spring</a>
+      <span class="badge badge-draft">待写</span>
+    </div>
+    <h1 class="post-title">Spring Boot 自动配置的加载顺序与覆盖</h1>
+    <p class="post-subtitle">Autoconfiguration Ordering</p>
+    <p class="post-meta">
+      <time datetime="2025-01-19">2025 年 1 月 19 日</time>
+      
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      <p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>
+      <p>引入一个 starter 之后，我们自己的 <code>DataSource</code> 配置突然失效。花了一下午才明白：自动配置的生效顺序由 <code>AutoConfiguration.imports</code> 和条件注解共同决定，光看代码顺序没有意义。这篇把判断逻辑讲清楚。</p>
+<h2 id="这篇文章要处理的问题"><a class="anchor" href="#这篇文章要处理的问题" aria-hidden="true">#</a>这篇文章要处理的问题</h2>
+<ul><li><code>@ConditionalOnMissingBean</code> 的判断发生在什么阶段，为什么它依赖顺序？</li><li><code>@AutoConfigureBefore/After</code> 与 <code>@Order</code> 在自动配置里分别管什么？</li><li>怎么用 <code>--debug</code> 或 <code>ConditionEvaluationReport</code> 查出某个配置为什么没生效？</li></ul>
+    </div>
+    
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">Spring 与生态</p>
+    <p class="area-callout-desc">IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。</p>
+    <a class="btn btn-link" href="../area/spring.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="full-gc-investigation.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">一次 Full GC 排查：从 GC 日志到堆转储</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="how-we-broke-a-monolith.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">微服务拆分：我们是怎么把一个单体拆坏的</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/transactional-not-working.html">
+  <div class="post-card-meta">
+    <time datetime="2023-08-20">2023-08-20</time>
+    <span class="sep">·</span><span>Spring 与生态</span>
+    
+  </div>
+  <h3 class="post-card-title">@Transactional 失效的几种场景<span class="badge">待写</span></h3>
+  <p class="post-card-sub">When @Transactional Silently Fails</p>
+  <p class="post-card-summary">事务失效最麻烦的地方是它不报错。方法正常返回、日志正常打印、数据就是没回滚。这篇按触发条件整理常见场景和验证方式。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/spring-circular-dependency.html">
+  <div class="post-card-meta">
+    <time datetime="2023-07-16">2023-07-16</time>
+    <span class="sep">·</span><span>Spring 与生态</span>
+    <span class="sep">·</span><span>3 分钟</span>
+  </div>
+  <h3 class="post-card-title">Spring 循环依赖：三级缓存到底解决了什么</h3>
+  <p class="post-card-sub">Circular Dependencies and the Three-Level Cache</p>
+  <p class="post-card-summary">三级缓存不是为了“提前暴露对象”这么简单，它解决的是 AOP 场景下代理对象什么时候创建的问题。搞懂这一点，才能解释构造器注入为什么救不了循环依赖。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

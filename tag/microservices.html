@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微服务 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="拆分、治理、限流熔断与网关。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="微服务 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="拆分、治理、限流熔断与网关。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html" aria-current="page">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<section class="page-head">
+  <p class="crumb"><a href="../tags.html">标签</a> · <a href="../area/architecture.html">分布式与架构</a></p>
+  <h1>微服务</h1>
+  <p>拆分、治理、限流熔断与网关。</p>
+  <p class="page-head-meta">共 4 篇</p>
+</section>
+<div class="archive-body">
+  <div class="row-list">
+<a class="row-item is-draft" href="../posts/merging-services-back.html">
+  <time datetime="2026-04-26">2026-04-26</time>
+  <span class="row-title">我们把服务重新合并回了单体<span class="badge">待写</span></span>
+  <span class="row-summary">一年半前拆出去的三个服务又合回来了。不是因为微服务不好，而是我们拆的三个边界，恰好都是每天都在变的那部分。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item is-draft" href="../posts/gateway-rate-limiting.html">
+  <time datetime="2025-08-31">2025-08-31</time>
+  <span class="row-title">网关限流：Sentinel 之外的选择<span class="badge">待写</span></span>
+  <span class="row-summary">限流器本身不难写，难的是决定限在哪个维度、阈值是多少、被限的请求返回什么。工具选择只占这件事的一小部分。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item is-draft" href="../posts/idempotent-retry-timeout.html">
+  <time datetime="2025-05-31">2025-05-31</time>
+  <span class="row-title">幂等、重试与超时：分布式调用的三个默认值<span class="badge">待写</span></span>
+  <span class="row-summary">每一个跨服务调用都应该显式回答三个问题：超时多久、失败重试几次、重复执行会怎样。默认值通常都不是你能接受的那个。</span>
+  <span class="row-area">分布式与架构</span>
+</a>
+<a class="row-item is-draft" href="../posts/how-we-broke-a-monolith.html">
+  <time datetime="2024-12-30">2024-12-30</time>
+  <span class="row-title">微服务拆分：我们是怎么把一个单体拆坏的<span class="badge">待写</span></span>
+  <span class="row-summary">拆分之后发布变快了，但一次下单要跨七个服务、九个网络调用。我们把耦合从代码里搬到了网络上，然后发现网络没有事务。</span>
+  <span class="row-area">分布式与架构</span>
+</a></div>
+</div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

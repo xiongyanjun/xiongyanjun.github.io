@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关于 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="关于 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="feed.xml">
+<link rel="stylesheet" href="assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="archive.html">文章</a>
+      <a href="areas.html">方向</a>
+      <a href="about.html" aria-current="page">关于</a>
+      <a href="search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<section class="page-head">
+  <h1>关于</h1>
+  <p class="page-head-en">Java Backend · 技术笔记</p>
+</section>
+
+<section class="section prose">
+  <p>这里放的是我在 Java 后端这条线上的笔记。绝大多数内容来自两类时刻：线上出了问题、排查到深夜才发现是一个早就该想清楚的地方；或者读源码读到某处，突然明白一个以前只是“背下来”的结论到底为什么成立。</p>
+  <p>我尽量只写自己真正处理过的部分。所以这里的文章不太像教程，更像排查记录和思考过程的整理：先说清问题是怎么出现的，再说当时有哪些选择，最后才说为什么选了这一个。</p>
+  <p>站点按六个方向组织。文章会一直更新，没有固定的节奏——想清楚了就写，写不明白就先放着，页面上会标“待写”。</p>
+</section>
+
+<section class="section section-gray">
+  <div class="section-head"><h2>技术栈</h2></div>
+  <div class="stack-grid">
+    
+    <div class="card stack-card">
+      <p class="stack-title">语言与运行时</p>
+      <p class="stack-items">Java 8 → 21、JVM 内存与 GC、JIT、虚拟线程</p>
+    </div>
+    <div class="card stack-card">
+      <p class="stack-title">框架</p>
+      <p class="stack-items">Spring / Spring Boot / Spring Cloud、MyBatis</p>
+    </div>
+    <div class="card stack-card">
+      <p class="stack-title">数据与中间件</p>
+      <p class="stack-items">MySQL、Redis、Kafka / RocketMQ、Elasticsearch</p>
+    </div>
+    <div class="card stack-card">
+      <p class="stack-title">架构</p>
+      <p class="stack-items">微服务、网关、限流熔断、分布式事务与一致性</p>
+    </div>
+    <div class="card stack-card">
+      <p class="stack-title">工程</p>
+      <p class="stack-items">Maven / Gradle、JUnit、CI/CD、可观测性</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>怎么读这个站</h2></div>
+  <div class="prose">
+    <ul>
+      <li>想按时间看：去<a href="archive.html">文章列表</a>，按年份翻。</li>
+      <li>想按技术点看：去<a href="areas.html">方向</a>，六个方向下有更细的标签。</li>
+      <li>只想找某个词：用<a href="search.html">搜索</a>，全文检索在你的浏览器里完成。</li>
+      <li>标了“待写”的是已经定题、正文还在写作中，点进去能看到要处理的问题。</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section-dark contact">
+  <h2 class="contact-title">联系我</h2>
+  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊 Java，都欢迎来信。</p>
+  <a class="btn btn-primary btn-lg" href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="index.html">首页</a><a href="archive.html">文章</a><a href="areas.html">方向</a><a href="about.html">关于</a><a href="search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="area/jvm.html">JVM 与性能</a><a href="area/concurrency.html">并发与多线程</a><a href="area/spring.html">Spring 与生态</a><a href="area/data.html">数据与中间件</a><a href="area/architecture.html">分布式与架构</a><a href="area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="feed.xml">RSS 订阅</a>
+        <a href="about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

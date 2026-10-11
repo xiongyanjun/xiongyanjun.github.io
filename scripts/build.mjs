@@ -16,7 +16,29 @@ import { SITE, AREAS, TAGS, tagBySlug, areaBySlug, tagsOfArea } from '../site.co
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const SITE_DIR = path.join(ROOT, 'site');
-const DIST = path.join(ROOT, 'dist');
+
+// 构建产物直接放在仓库根目录：<用户名>.github.io 这类仓库默认就是从根目录发布，
+// 这样推送即上线，不需要在 Pages 设置里切换发布方式。
+const DIST = ROOT;
+
+// 每次构建前只清理自己产出的东西，绝不碰源码目录
+const GENERATED = [
+  'index.html',
+  'archive.html',
+  'areas.html',
+  'tags.html',
+  'about.html',
+  'search.html',
+  '404.html',
+  'feed.xml',
+  'sitemap.xml',
+  'robots.txt',
+  '.nojekyll',
+  'posts',
+  'area',
+  'tag',
+  'assets',
+];
 
 /* ------------------------------------------------------------------ */
 /* 载入内容                                                            */
@@ -645,7 +667,9 @@ function copyDir(from, to) {
   }
 }
 
-fs.rmSync(DIST, { recursive: true, force: true });
+for (const target of GENERATED) {
+  fs.rmSync(path.join(DIST, target), { recursive: true, force: true });
+}
 fs.mkdirSync(DIST, { recursive: true });
 
 copyDir(SITE_DIR, DIST);

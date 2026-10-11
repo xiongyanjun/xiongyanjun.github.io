@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我们把服务重新合并回了单体 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="一年半前拆出去的三个服务又合回来了。不是因为微服务不好，而是我们拆的三个边界，恰好都是每天都在变的那部分。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="我们把服务重新合并回了单体 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="一年半前拆出去的三个服务又合回来了。不是因为微服务不好，而是我们拆的三个边界，恰好都是每天都在变的那部分。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/architecture.html">分布式与架构</a>
+      <a class="badge" href="../tag/microservices.html">微服务</a>
+      <span class="badge badge-draft">待写</span>
+    </div>
+    <h1 class="post-title">我们把服务重新合并回了单体</h1>
+    <p class="post-subtitle">Merging Services Back</p>
+    <p class="post-meta">
+      <time datetime="2026-04-26">2026 年 4 月 26 日</time>
+      
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      <p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>
+      <p>合并的直接触发点是发布：一次业务改动要同时改三个仓库、走三次发布、做两次兼容。统计下来，这三对服务之间的接口变更占了全部改动的四成。这篇记录判断依据和迁移方式。</p>
+<h2 id="这篇文章要处理的问题"><a class="anchor" href="#这篇文章要处理的问题" aria-hidden="true">#</a>这篇文章要处理的问题</h2>
+<ul><li>什么样的服务边界是稳定的，可以用什么信号来判断？</li><li>合并的技术路径有哪些，如何在不影响线上的前提下完成？</li><li>从这次经历里能总结出哪些“不该拆”的判断规则？</li></ul>
+    </div>
+    
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">分布式与架构</p>
+    <p class="area-callout-desc">拆分与合并、一致性、限流熔断、故障隔离——把不确定性放在看得见的地方。</p>
+    <a class="btn btn-link" href="../area/architecture.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="record-sealed-immutability.html">
+      <span class="post-nav-label">更新的一篇</span>
+      <span class="post-nav-title">record、sealed 与不可变设计</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="structured-concurrency.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">结构化并发：虚拟线程之后的下一个问题</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card is-draft" href="../posts/gateway-rate-limiting.html">
+  <div class="post-card-meta">
+    <time datetime="2025-08-31">2025-08-31</time>
+    <span class="sep">·</span><span>分布式与架构</span>
+    
+  </div>
+  <h3 class="post-card-title">网关限流：Sentinel 之外的选择<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Rate Limiting Beyond Sentinel</p>
+  <p class="post-card-summary">限流器本身不难写，难的是决定限在哪个维度、阈值是多少、被限的请求返回什么。工具选择只占这件事的一小部分。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/idempotent-retry-timeout.html">
+  <div class="post-card-meta">
+    <time datetime="2025-05-31">2025-05-31</time>
+    <span class="sep">·</span><span>分布式与架构</span>
+    
+  </div>
+  <h3 class="post-card-title">幂等、重试与超时：分布式调用的三个默认值<span class="badge">待写</span></h3>
+  <p class="post-card-sub">Idempotence, Retry, Timeout</p>
+  <p class="post-card-summary">每一个跨服务调用都应该显式回答三个问题：超时多久、失败重试几次、重复执行会怎样。默认值通常都不是你能接受的那个。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/how-we-broke-a-monolith.html">
+  <div class="post-card-meta">
+    <time datetime="2024-12-30">2024-12-30</time>
+    <span class="sep">·</span><span>分布式与架构</span>
+    
+  </div>
+  <h3 class="post-card-title">微服务拆分：我们是怎么把一个单体拆坏的<span class="badge">待写</span></h3>
+  <p class="post-card-sub">How We Broke a Monolith</p>
+  <p class="post-card-summary">拆分之后发布变快了，但一次下单要跨七个服务、九个网络调用。我们把耦合从代码里搬到了网络上，然后发现网络没有事务。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

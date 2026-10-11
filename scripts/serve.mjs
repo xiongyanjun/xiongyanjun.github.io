@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+// 站点直接生成在仓库根目录，这里也就从根目录提供服务
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT || 4321);
 
 const TYPES = {
@@ -23,7 +24,7 @@ const TYPES = {
 };
 
 if (!fs.existsSync(ROOT)) {
-  console.error('找不到 dist/，请先运行 npm run build');
+  console.error('找不到仓库目录，请先运行 npm run build');
   process.exit(1);
 }
 
