@@ -51,19 +51,19 @@
   <time datetime="2026-08-30">2026-08-30</time>
   <span class="row-title">一次线上 CPU 飙高的排查过程<span class="badge">待写</span></span>
   <span class="row-summary">CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/observability-micrometer-otel.html">
   <time datetime="2026-02-22">2026-02-22</time>
   <span class="row-title">可观测性：从 Micrometer 到 OpenTelemetry<span class="badge">待写</span></span>
   <span class="row-summary">指标、日志、链路三件套各自解决不同问题。真正难的不是接入，而是决定什么值得被记录下来。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item" href="../posts/full-gc-investigation.html">
   <time datetime="2025-02-23">2025-02-23</time>
   <span class="row-title">一次 Full GC 排查：从 GC 日志到堆转储</span>
   <span class="row-summary">服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/how-we-broke-a-monolith.html">
   <time datetime="2024-12-30">2024-12-30</time>
@@ -93,19 +93,19 @@
   <time datetime="2023-04-23">2023-04-23</time>
   <span class="row-title">堆外内存：为什么 OOM 的时候堆看起来很健康<span class="badge">待写</span></span>
   <span class="row-summary">容器被 OOM Killer 杀掉，堆内存曲线却一路平稳。堆外内存、元空间、线程栈、DirectByteBuffer 都在堆的账本之外。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/classloader-and-delegation.html">
   <time datetime="2023-03-19">2023-03-19</time>
   <span class="row-title">类加载与双亲委派：从一次 NoClassDefFoundError 说起<span class="badge">待写</span></span>
   <span class="row-summary">同一个类被两个加载器加载，就会变成两个不同的类型。所有“类转换异常”和静态变量不共享的怪事，源头都在这里。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item" href="../posts/jdk8-to-jdk17-upgrade.html">
   <time datetime="2023-01-15">2023-01-15</time>
   <span class="row-title">从 JDK 8 升到 JDK 17：一次真实升级里踩到的坑</span>
   <span class="row-summary">一个跑了六年的服务，从 JDK 8 升到 17 花了三周。真正的成本不在语言特性上，而在那些依赖了内部 API、GC 参数和旧字节码工具的地方。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a></div>
 </div>
 
@@ -121,7 +121,7 @@
       </div>
       <div class="footer-col">
         <p class="footer-col-title">方向</p>
-        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+        <a href="../area/jvm.html">运行时与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">框架与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与思辨</a>
       </div>
       <div class="footer-col">
         <p class="footer-col-title">联系</p>

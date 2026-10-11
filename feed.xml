@@ -3,7 +3,7 @@
 <channel>
   <title>🐻‍❄️🦘🐎</title>
   <link>https://xiongyanjun.github.io</link>
-  <description>一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。</description>
+  <description>计算机工程与哲学的笔记：运行时与并发、系统与数据、架构与分布式，以及藏在技术选择背后的判断与追问。</description>
   <language>zh-cn</language>
   <atom:link href="https://xiongyanjun.github.io/feed.xml" rel="self" type="application/rss+xml" />
 
@@ -12,15 +12,15 @@
     <link>https://xiongyanjun.github.io/posts/tech-stack-as-a-map.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/tech-stack-as-a-map.html</guid>
     <pubDate>Mon, 05 Oct 2026 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。</description>
   </item>
   <item>
-    <title>写了这些年 Java，我保留的几个判断</title>
+    <title>写了这些年代码，我保留的几个判断</title>
     <link>https://xiongyanjun.github.io/posts/judgments-i-keep.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/judgments-i-keep.html</guid>
     <pubDate>Sun, 27 Sep 2026 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。</description>
   </item>
   <item>
@@ -28,7 +28,7 @@
     <link>https://xiongyanjun.github.io/posts/high-cpu-investigation.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/high-cpu-investigation.html</guid>
     <pubDate>Sun, 30 Aug 2026 01:00:00 GMT</pubDate>
-    <category>JVM 与性能</category>
+    <category>运行时与性能</category>
     <description>CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</description>
   </item>
   <item>
@@ -36,7 +36,7 @@
     <link>https://xiongyanjun.github.io/posts/from-tools-to-judgment.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/from-tools-to-judgment.html</guid>
     <pubDate>Sun, 26 Jul 2026 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>模型能写出能跑的代码，但跑起来之后呢？真正拉开差距的是选型、边界、取舍，以及“这件事该不该做”。</description>
   </item>
   <item>
@@ -44,7 +44,7 @@
     <link>https://xiongyanjun.github.io/posts/boundary-test-cases.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/boundary-test-cases.html</guid>
     <pubDate>Sun, 28 Jun 2026 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>覆盖正常路径的测试让人安心，真正救过命的是那些当时看起来多余的边界用例：空集合、单元素、null 时间戳、跨天、跨时区。</description>
   </item>
   <item>
@@ -52,7 +52,7 @@
     <link>https://xiongyanjun.github.io/posts/record-sealed-immutability.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/record-sealed-immutability.html</guid>
     <pubDate>Sun, 31 May 2026 01:00:00 GMT</pubDate>
-    <category>JVM 与性能</category>
+    <category>运行时与性能</category>
     <description>record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。</description>
   </item>
   <item>
@@ -76,7 +76,7 @@
     <link>https://xiongyanjun.github.io/posts/observability-micrometer-otel.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/observability-micrometer-otel.html</guid>
     <pubDate>Sun, 22 Feb 2026 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>指标、日志、链路三件套各自解决不同问题。真正难的不是接入，而是决定什么值得被记录下来。</description>
   </item>
   <item>
@@ -84,7 +84,7 @@
     <link>https://xiongyanjun.github.io/posts/graalvm-native-image-cost.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/graalvm-native-image-cost.html</guid>
     <pubDate>Sun, 18 Jan 2026 01:00:00 GMT</pubDate>
-    <category>JVM 与性能</category>
+    <category>运行时与性能</category>
     <description>启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。</description>
   </item>
   <item>
@@ -92,7 +92,7 @@
     <link>https://xiongyanjun.github.io/posts/ai-assisted-java.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/ai-assisted-java.html</guid>
     <pubDate>Sun, 28 Dec 2025 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>在写样板代码、翻源码、写测试数据上确实省时间。在排查问题和做设计判断上，它更多是提供线索，而不是给答案。</description>
   </item>
   <item>
@@ -100,7 +100,7 @@
     <link>https://xiongyanjun.github.io/posts/jdk21-features-in-production.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/jdk21-features-in-production.html</guid>
     <pubDate>Sun, 12 Oct 2025 01:00:00 GMT</pubDate>
-    <category>JVM 与性能</category>
+    <category>运行时与性能</category>
     <description>虚拟线程、record pattern、模式匹配 switch、顺序集合、ScopedValue。有些立刻用上了，有些还在观察，有些暂时不适合。</description>
   </item>
   <item>
@@ -124,7 +124,7 @@
     <link>https://xiongyanjun.github.io/posts/what-mocks-really-test.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/what-mocks-really-test.html</guid>
     <pubDate>Sun, 29 Jun 2025 01:00:00 GMT</pubDate>
-    <category>工程与判断</category>
+    <category>工程与思辨</category>
     <description>过度 mock 的测试其实在测实现细节：你换一种写法，测试就红了，但行为没变。这类测试的成本远高于它的价值。</description>
   </item>
   <item>
@@ -148,7 +148,7 @@
     <link>https://xiongyanjun.github.io/posts/jit-warmup.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/jit-warmup.html</guid>
     <pubDate>Sun, 30 Mar 2025 01:00:00 GMT</pubDate>
-    <category>JVM 与性能</category>
+    <category>运行时与性能</category>
     <description>压测跑十分钟得到的数字，和线上跑一整天得到的数字不是同一件事。解释执行、C1、C2 三个阶段的表现差异很大。</description>
   </item>
   <item>
@@ -156,7 +156,7 @@
     <link>https://xiongyanjun.github.io/posts/full-gc-investigation.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/full-gc-investigation.html</guid>
     <pubDate>Sun, 23 Feb 2025 01:00:00 GMT</pubDate>
-    <category>JVM 与性能</category>
+    <category>运行时与性能</category>
     <description>服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。</description>
   </item>
   <item>
@@ -164,7 +164,7 @@
     <link>https://xiongyanjun.github.io/posts/spring-boot-autoconfiguration-order.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/spring-boot-autoconfiguration-order.html</guid>
     <pubDate>Sun, 19 Jan 2025 01:00:00 GMT</pubDate>
-    <category>Spring 与生态</category>
+    <category>框架与生态</category>
     <description>我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。</description>
   </item>
 </channel>

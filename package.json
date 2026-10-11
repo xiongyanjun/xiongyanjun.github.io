@@ -2,7 +2,7 @@
   "name": "polarbear-kangaroo-horse-blog",
   "version": "1.0.0",
   "private": true,
-  "description": "🐻‍❄️🦘🐎 — Java 后端技术笔记：零依赖静态博客生成器",
+  "description": "🐻‍❄️🦘🐎 — 计算机工程与哲学：零依赖静态博客生成器",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",

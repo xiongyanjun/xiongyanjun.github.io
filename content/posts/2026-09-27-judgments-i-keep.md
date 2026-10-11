@@ -1,5 +1,5 @@
 ---
-title: 写了这些年 Java，我保留的几个判断
+title: 写了这些年代码，我保留的几个判断
 subtitle: Judgments I Still Keep
 date: 2026-09-27
 year: 2026

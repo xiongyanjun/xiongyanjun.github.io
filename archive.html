@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>文章 · 🐻‍❄️🦘🐎</title>
-<meta name="description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta name="description" content="计算机工程与哲学的笔记：运行时与并发、系统与数据、架构与分布式，以及藏在技术选择背后的判断与追问。">
 <meta name="author" content="🐻‍❄️🦘🐎">
 <meta property="og:title" content="文章 · 🐻‍❄️🦘🐎">
-<meta property="og:description" content="一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。">
+<meta property="og:description" content="计算机工程与哲学的笔记：运行时与并发、系统与数据、架构与分布式，以及藏在技术选择背后的判断与追问。">
 <meta property="og:type" content="website">
 <link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="feed.xml">
 <link rel="stylesheet" href="assets/css/main.css">
@@ -54,37 +54,37 @@
   <time datetime="2026-10-05">2026-10-05</time>
   <span class="row-title">把技术栈当地图，而不是清单</span>
   <span class="row-summary">清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item" href="posts/judgments-i-keep.html">
   <time datetime="2026-09-27">2026-09-27</time>
-  <span class="row-title">写了这些年 Java，我保留的几个判断</span>
+  <span class="row-title">写了这些年代码，我保留的几个判断</span>
   <span class="row-summary">大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/high-cpu-investigation.html">
   <time datetime="2026-08-30">2026-08-30</time>
   <span class="row-title">一次线上 CPU 飙高的排查过程<span class="badge">待写</span></span>
   <span class="row-summary">CPU 从 30% 涨到 90%，QPS 没变——这类“无缘无故变忙”的问题，通常不是用户量引起的。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/from-tools-to-judgment.html">
   <time datetime="2026-07-26">2026-07-26</time>
   <span class="row-title">从工具到判断：AI 时代 Java 工程师的价值<span class="badge">待写</span></span>
   <span class="row-summary">模型能写出能跑的代码，但跑起来之后呢？真正拉开差距的是选型、边界、取舍，以及“这件事该不该做”。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/boundary-test-cases.html">
   <time datetime="2026-06-28">2026-06-28</time>
   <span class="row-title">边界用例：我为什么还在写那些「没用」的测试<span class="badge">待写</span></span>
   <span class="row-summary">覆盖正常路径的测试让人安心，真正救过命的是那些当时看起来多余的边界用例：空集合、单元素、null 时间戳、跨天、跨时区。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/record-sealed-immutability.html">
   <time datetime="2026-05-31">2026-05-31</time>
   <span class="row-title">record、sealed 与不可变设计<span class="badge">待写</span></span>
   <span class="row-summary">record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/merging-services-back.html">
   <time datetime="2026-04-26">2026-04-26</time>
@@ -102,13 +102,13 @@
   <time datetime="2026-02-22">2026-02-22</time>
   <span class="row-title">可观测性：从 Micrometer 到 OpenTelemetry<span class="badge">待写</span></span>
   <span class="row-summary">指标、日志、链路三件套各自解决不同问题。真正难的不是接入，而是决定什么值得被记录下来。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item" href="posts/graalvm-native-image-cost.html">
   <time datetime="2026-01-18">2026-01-18</time>
   <span class="row-title">GraalVM Native Image 在 Spring Boot 3 上的成本清单</span>
   <span class="row-summary">启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a></div>
   </section>
   <section class="year-block" id="y2025">
@@ -121,13 +121,13 @@
   <time datetime="2025-12-28">2025-12-28</time>
   <span class="row-title">AI 辅助写 Java：哪些环节真的省时间<span class="badge">待写</span></span>
   <span class="row-summary">在写样板代码、翻源码、写测试数据上确实省时间。在排查问题和做设计判断上，它更多是提供线索，而不是给答案。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/jdk21-features-in-production.html">
   <time datetime="2025-10-12">2025-10-12</time>
   <span class="row-title">JDK 21 的几个新特性，我在生产里用了哪些<span class="badge">待写</span></span>
   <span class="row-summary">虚拟线程、record pattern、模式匹配 switch、顺序集合、ScopedValue。有些立刻用上了，有些还在观察，有些暂时不适合。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/gateway-rate-limiting.html">
   <time datetime="2025-08-31">2025-08-31</time>
@@ -145,7 +145,7 @@
   <time datetime="2025-06-29">2025-06-29</time>
   <span class="row-title">Mock 到底在测什么<span class="badge">待写</span></span>
   <span class="row-summary">过度 mock 的测试其实在测实现细节：你换一种写法，测试就红了，但行为没变。这类测试的成本远高于它的价值。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/idempotent-retry-timeout.html">
   <time datetime="2025-05-31">2025-05-31</time>
@@ -163,19 +163,19 @@
   <time datetime="2025-03-30">2025-03-30</time>
   <span class="row-title">JIT 预热：为什么压测数据总比线上好看<span class="badge">待写</span></span>
   <span class="row-summary">压测跑十分钟得到的数字，和线上跑一整天得到的数字不是同一件事。解释执行、C1、C2 三个阶段的表现差异很大。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item" href="posts/full-gc-investigation.html">
   <time datetime="2025-02-23">2025-02-23</time>
   <span class="row-title">一次 Full GC 排查：从 GC 日志到堆转储</span>
   <span class="row-summary">服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/spring-boot-autoconfiguration-order.html">
   <time datetime="2025-01-19">2025-01-19</time>
   <span class="row-title">Spring Boot 自动配置的加载顺序与覆盖<span class="badge">待写</span></span>
   <span class="row-summary">我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。</span>
-  <span class="row-area">Spring 与生态</span>
+  <span class="row-area">框架与生态</span>
 </a></div>
   </section>
   <section class="year-block" id="y2024">
@@ -218,7 +218,7 @@
   <time datetime="2024-05-26">2024-05-26</time>
   <span class="row-title">代码评审：我现在怎么看一段代码<span class="badge">待写</span></span>
   <span class="row-summary">我不再从头读到尾，而是先看这次改动会在什么条件下出错，再看它有没有把出错这件事写清楚。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/aqs-and-reentrantlock.html">
   <time datetime="2024-04-28">2024-04-28</time>
@@ -255,7 +255,7 @@
   <time datetime="2023-12-29">2023-12-29</time>
   <span class="row-title">把 Java 基础重新学一遍：我的复习清单<span class="badge">待写</span></span>
   <span class="row-summary">工作中用不到的语法，长期不用就会变成“以为自己懂”。我按“能不能推导出结论”而不是“能不能背出答案”整理了一份清单。</span>
-  <span class="row-area">工程与判断</span>
+  <span class="row-area">工程与思辨</span>
 </a>
 <a class="row-item is-draft" href="posts/connection-pool-leak.html">
   <time datetime="2023-11-06">2023-11-06</time>
@@ -273,43 +273,43 @@
   <time datetime="2023-08-20">2023-08-20</time>
   <span class="row-title">@Transactional 失效的几种场景<span class="badge">待写</span></span>
   <span class="row-summary">事务失效最麻烦的地方是它不报错。方法正常返回、日志正常打印、数据就是没回滚。这篇按触发条件整理常见场景和验证方式。</span>
-  <span class="row-area">Spring 与生态</span>
+  <span class="row-area">框架与生态</span>
 </a>
 <a class="row-item" href="posts/spring-circular-dependency.html">
   <time datetime="2023-07-16">2023-07-16</time>
   <span class="row-title">Spring 循环依赖：三级缓存到底解决了什么</span>
   <span class="row-summary">三级缓存不是为了“提前暴露对象”这么简单，它解决的是 AOP 场景下代理对象什么时候创建的问题。搞懂这一点，才能解释构造器注入为什么救不了循环依赖。</span>
-  <span class="row-area">Spring 与生态</span>
+  <span class="row-area">框架与生态</span>
 </a>
 <a class="row-item is-draft" href="posts/g1-or-zgc.html">
   <time datetime="2023-06-11">2023-06-11</time>
   <span class="row-title">G1 还是 ZGC：怎么为一个服务选垃圾收集器<span class="badge">待写</span></span>
   <span class="row-summary">选收集器不是选“最先进的那个”，而是先回答三个问题：延迟目标多少、堆多大、机器还有多少余量。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/off-heap-memory-oom.html">
   <time datetime="2023-04-23">2023-04-23</time>
   <span class="row-title">堆外内存：为什么 OOM 的时候堆看起来很健康<span class="badge">待写</span></span>
   <span class="row-summary">容器被 OOM Killer 杀掉，堆内存曲线却一路平稳。堆外内存、元空间、线程栈、DirectByteBuffer 都在堆的账本之外。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/classloader-and-delegation.html">
   <time datetime="2023-03-19">2023-03-19</time>
   <span class="row-title">类加载与双亲委派：从一次 NoClassDefFoundError 说起<span class="badge">待写</span></span>
   <span class="row-summary">同一个类被两个加载器加载，就会变成两个不同的类型。所有“类转换异常”和静态变量不共享的怪事，源头都在这里。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="posts/hashmap-capacity-power-of-two.html">
   <time datetime="2023-02-26">2023-02-26</time>
   <span class="row-title">HashMap 扩容为什么必须是 2 的幂<span class="badge">待写</span></span>
   <span class="row-summary">不是说“位运算更快”就完了。2 的幂真正决定的是桶下标的计算方式和扩容时的元素迁移成本。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item" href="posts/jdk8-to-jdk17-upgrade.html">
   <time datetime="2023-01-15">2023-01-15</time>
   <span class="row-title">从 JDK 8 升到 JDK 17：一次真实升级里踩到的坑</span>
   <span class="row-summary">一个跑了六年的服务，从 JDK 8 升到 17 花了三周。真正的成本不在语言特性上，而在那些依赖了内部 API、GC 参数和旧字节码工具的地方。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a></div>
   </section></div>
 
@@ -325,7 +325,7 @@
       </div>
       <div class="footer-col">
         <p class="footer-col-title">方向</p>
-        <a href="area/jvm.html">JVM 与性能</a><a href="area/concurrency.html">并发与多线程</a><a href="area/spring.html">Spring 与生态</a><a href="area/data.html">数据与中间件</a><a href="area/architecture.html">分布式与架构</a><a href="area/craft.html">工程与判断</a>
+        <a href="area/jvm.html">运行时与性能</a><a href="area/concurrency.html">并发与多线程</a><a href="area/spring.html">框架与生态</a><a href="area/data.html">数据与中间件</a><a href="area/architecture.html">分布式与架构</a><a href="area/craft.html">工程与思辨</a>
       </div>
       <div class="footer-col">
         <p class="footer-col-title">联系</p>

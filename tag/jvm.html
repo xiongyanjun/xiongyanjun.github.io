@@ -40,7 +40,7 @@
 <main id="main">
 
 <section class="page-head">
-  <p class="crumb"><a href="../tags.html">标签</a> · <a href="../area/jvm.html">JVM 与性能</a></p>
+  <p class="crumb"><a href="../tags.html">标签</a> · <a href="../area/jvm.html">运行时与性能</a></p>
   <h1>JVM</h1>
   <p>内存结构、类加载、字节码与运行时。</p>
   <p class="page-head-meta">共 8 篇</p>
@@ -51,49 +51,49 @@
   <time datetime="2026-05-31">2026-05-31</time>
   <span class="row-title">record、sealed 与不可变设计<span class="badge">待写</span></span>
   <span class="row-summary">record 不只是省掉 getter，它把「这个对象不可变」写进了类型里。配合 sealed 使用时，编译器能帮你检查遗漏的分支。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item" href="../posts/graalvm-native-image-cost.html">
   <time datetime="2026-01-18">2026-01-18</time>
   <span class="row-title">GraalVM Native Image 在 Spring Boot 3 上的成本清单</span>
   <span class="row-summary">启动从 2.1 秒降到 90 毫秒，内存降到四分之一。代价是构建时间翻五倍、反射要手工登记，以及排查工具基本不能用。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/jdk21-features-in-production.html">
   <time datetime="2025-10-12">2025-10-12</time>
   <span class="row-title">JDK 21 的几个新特性，我在生产里用了哪些<span class="badge">待写</span></span>
   <span class="row-summary">虚拟线程、record pattern、模式匹配 switch、顺序集合、ScopedValue。有些立刻用上了，有些还在观察，有些暂时不适合。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/jit-warmup.html">
   <time datetime="2025-03-30">2025-03-30</time>
   <span class="row-title">JIT 预热：为什么压测数据总比线上好看<span class="badge">待写</span></span>
   <span class="row-summary">压测跑十分钟得到的数字，和线上跑一整天得到的数字不是同一件事。解释执行、C1、C2 三个阶段的表现差异很大。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/off-heap-memory-oom.html">
   <time datetime="2023-04-23">2023-04-23</time>
   <span class="row-title">堆外内存：为什么 OOM 的时候堆看起来很健康<span class="badge">待写</span></span>
   <span class="row-summary">容器被 OOM Killer 杀掉，堆内存曲线却一路平稳。堆外内存、元空间、线程栈、DirectByteBuffer 都在堆的账本之外。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/classloader-and-delegation.html">
   <time datetime="2023-03-19">2023-03-19</time>
   <span class="row-title">类加载与双亲委派：从一次 NoClassDefFoundError 说起<span class="badge">待写</span></span>
   <span class="row-summary">同一个类被两个加载器加载，就会变成两个不同的类型。所有“类转换异常”和静态变量不共享的怪事，源头都在这里。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item is-draft" href="../posts/hashmap-capacity-power-of-two.html">
   <time datetime="2023-02-26">2023-02-26</time>
   <span class="row-title">HashMap 扩容为什么必须是 2 的幂<span class="badge">待写</span></span>
   <span class="row-summary">不是说“位运算更快”就完了。2 的幂真正决定的是桶下标的计算方式和扩容时的元素迁移成本。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a>
 <a class="row-item" href="../posts/jdk8-to-jdk17-upgrade.html">
   <time datetime="2023-01-15">2023-01-15</time>
   <span class="row-title">从 JDK 8 升到 JDK 17：一次真实升级里踩到的坑</span>
   <span class="row-summary">一个跑了六年的服务，从 JDK 8 升到 17 花了三周。真正的成本不在语言特性上，而在那些依赖了内部 API、GC 参数和旧字节码工具的地方。</span>
-  <span class="row-area">JVM 与性能</span>
+  <span class="row-area">运行时与性能</span>
 </a></div>
 </div>
 
@@ -109,7 +109,7 @@
       </div>
       <div class="footer-col">
         <p class="footer-col-title">方向</p>
-        <a href="../area/jvm.html">JVM 与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">Spring 与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与判断</a>
+        <a href="../area/jvm.html">运行时与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">框架与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与思辨</a>
       </div>
       <div class="footer-col">
         <p class="footer-col-title">联系</p>

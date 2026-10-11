@@ -7,9 +7,9 @@ export const SITE = {
   email: 'xiongyanjun97@qq.com',
   // 部署地址（影响 RSS / sitemap / 绝对链接）
   url: 'https://xiongyanjun.github.io',
-  tagline: '把 Java 写清楚。',
+  tagline: '把问题想清楚。',
   description:
-    '一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。',
+    '计算机工程与哲学的笔记：运行时与并发、系统与数据、架构与分布式，以及藏在技术选择背后的判断与追问。',
   locale: 'zh-CN',
   nav: [
     { href: '/index.html', label: '首页' },
@@ -24,9 +24,9 @@ export const SITE = {
 export const AREAS = [
   {
     slug: 'jvm',
-    name: 'JVM 与性能',
-    english: 'JVM & Performance',
-    desc: '内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。',
+    name: '运行时与性能',
+    english: 'Runtime & Performance',
+    desc: '虚拟机、内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。',
   },
   {
     slug: 'concurrency',
@@ -36,9 +36,9 @@ export const AREAS = [
   },
   {
     slug: 'spring',
-    name: 'Spring 与生态',
-    english: 'Spring',
-    desc: 'IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。',
+    name: '框架与生态',
+    english: 'Frameworks',
+    desc: '框架背后的设计取舍：IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。',
   },
   {
     slug: 'data',
@@ -54,9 +54,9 @@ export const AREAS = [
   },
   {
     slug: 'craft',
-    name: '工程与判断',
-    english: 'Engineering Craft',
-    desc: '测试、构建、可观测性、代码评审，以及一个工程师如何形成自己的判断。',
+    name: '工程与思辨',
+    english: 'Craft & Reflection',
+    desc: '测试、构建、可观测性，以及一个工程师如何形成判断、如何追问“这件事值不值得做”。',
   },
 ];
 

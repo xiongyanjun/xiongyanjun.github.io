@@ -211,7 +211,7 @@ function buildIndex() {
 
   const content = `
 <section class="hero">
-  <p class="hero-eyebrow">Java 后端工程师的技术笔记</p>
+  <p class="hero-eyebrow">哲学与计算机工程</p>
   <h1 class="hero-title">${escapeHtml(SITE.tagline)}</h1>
   <p class="hero-sub">技术回答「能不能做到」，哲学回答「值不值得做」——写代码的人，最后都站在这两者之间。</p>
   <div class="hero-actions">
@@ -239,7 +239,7 @@ function buildIndex() {
 
 <section class="section section-dark contact">
   <h2 class="contact-title">想聊点什么？</h2>
-  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊 Java，都欢迎来信。</p>
+  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊工程与判断，都欢迎来信。</p>
   <a class="btn btn-primary btn-lg" href="${MAIL}">${SITE.email}</a>
   <p class="contact-meta">一般两三天内回复 · 也可以直接<a href="archive.html">翻翻文章</a></p>
 </section>
@@ -502,7 +502,7 @@ ${
 
 function buildAbout() {
   const stack = [
-    ['语言与运行时', 'Java 8 → 21、JVM 内存与 GC、JIT、虚拟线程'],
+    ['语言与运行时', 'Java / JVM、内存与 GC、JIT、并发与虚拟线程'],
     ['框架', 'Spring / Spring Boot / Spring Cloud、MyBatis'],
     ['数据与中间件', 'MySQL、Redis、Kafka / RocketMQ、Elasticsearch'],
     ['架构', '微服务、网关、限流熔断、分布式事务与一致性'],
@@ -512,13 +512,18 @@ function buildAbout() {
   const content = `
 <section class="page-head">
   <h1>关于</h1>
-  <p class="page-head-en">Java Backend · 技术笔记</p>
+  <p class="page-head-en">Engineering &amp; Philosophy · 技术笔记</p>
 </section>
 
-<section class="section prose">
-  <p>这里放的是我在 Java 后端这条线上的笔记。绝大多数内容来自两类时刻：线上出了问题、排查到深夜才发现是一个早就该想清楚的地方；或者读源码读到某处，突然明白一个以前只是“背下来”的结论到底为什么成立。</p>
-  <p>我尽量只写自己真正处理过的部分。所以这里的文章不太像教程，更像排查记录和思考过程的整理：先说清问题是怎么出现的，再说当时有哪些选择，最后才说为什么选了这一个。</p>
-  <p>站点按六个方向组织。文章会一直更新，没有固定的节奏——想清楚了就写，写不明白就先放着，页面上会标“待写”。</p>
+<section class="section">
+  <div class="section-inner">
+    <div class="prose">
+      <p>这个站点放的是我在计算机工程与哲学这两件事之间的笔记。绝大多数内容来自两类时刻：线上出了问题、排查到深夜才发现是一个早就该想清楚的地方；或者读源码读到某处，突然明白一个以前只是“背下来”的结论到底为什么成立。</p>
+      <p>我尽量只写自己真正处理过的部分。所以这里的文章不太像教程，更像排查记录和思考过程的整理：先说清问题是怎么出现的，再说当时有哪些选择，最后才说为什么选了这一个。</p>
+      <p>之所以把哲学和工程放在一起：工程里最难的部分往往不是实现，而是判断——判断什么值得做、什么代价可以承受、什么应该放弃。这些问题技术本身回答不了。</p>
+      <p>站点按六个方向组织。文章会一直更新，没有固定的节奏——想清楚了就写，写不明白就先放着，页面上会标“待写”。</p>
+    </div>
+  </div>
 </section>
 
 <section class="section section-gray">
@@ -538,19 +543,21 @@ function buildAbout() {
 
 <section class="section">
   <div class="section-head"><h2>怎么读这个站</h2></div>
-  <div class="prose">
-    <ul>
-      <li>想按时间看：去<a href="archive.html">文章列表</a>，按年份翻。</li>
-      <li>想按技术点看：去<a href="areas.html">方向</a>，六个方向下有更细的标签。</li>
-      <li>只想找某个词：用<a href="search.html">搜索</a>，全文检索在你的浏览器里完成。</li>
-      <li>标了“待写”的是已经定题、正文还在写作中，点进去能看到要处理的问题。</li>
-    </ul>
+  <div class="section-inner">
+    <div class="prose">
+      <ul>
+        <li>想按时间看：去<a href="archive.html">文章列表</a>，按年份翻。</li>
+        <li>想按方向看：去<a href="areas.html">方向</a>，六个方向下有更细的标签。</li>
+        <li>只想找某个词：用<a href="search.html">搜索</a>，全文检索在你的浏览器里完成。</li>
+        <li>标了“待写”的是已经定题、正文还在写作中，点进去能看到要处理的问题。</li>
+      </ul>
+    </div>
   </div>
 </section>
 
 <section class="section section-dark contact">
   <h2 class="contact-title">联系我</h2>
-  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊 Java，都欢迎来信。</p>
+  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊工程与判断，都欢迎来信。</p>
   <a class="btn btn-primary btn-lg" href="${MAIL}">${SITE.email}</a>
 </section>
 `;

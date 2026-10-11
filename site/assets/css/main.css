@@ -624,7 +624,8 @@ html[data-theme="dark"] .theme-toggle-icon {
 /* ---------------------------------------------------------------- 页头 */
 
 .page-head {
-  max-width: var(--wrap);
+  /* 加上左右内边距，保证内容左边界与 .section 里的区块完全对齐 */
+  max-width: calc(var(--wrap) + 44px);
   margin: 0 auto;
   padding: 64px 22px 28px;
 }
@@ -677,9 +678,16 @@ html[data-theme="dark"] .theme-toggle-icon {
 /* ---------------------------------------------------------------- 归档 */
 
 .archive-body {
-  max-width: var(--wrap);
+  max-width: calc(var(--wrap) + 44px);
   margin: 0 auto;
   padding: 0 22px 72px;
+}
+
+/* 窄内容块（如正文段落）放进它里面，就不会被自动居中推开 */
+.section-inner {
+  max-width: var(--wrap);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .year-block {
