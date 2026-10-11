@@ -1,0 +1,12 @@
+{
+  "name": "polarbear-kangaroo-horse-blog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "🐻‍❄️🦘🐎 — 四年 · 技术与哲学：零依赖静态博客生成器",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "node scripts/serve.mjs",
+    "dev": "node scripts/build.mjs && node scripts/serve.mjs"
+  }
+}
