@@ -11,7 +11,7 @@ import {
   estimateMinutes,
   stripMarkdown,
 } from './lib/markdown.mjs';
-import { SITE, ACTS, THREADS, TAGS, tagBySlug, threadBySlug, actByYear } from '../site.config.mjs';
+import { SITE, AREAS, TAGS, tagBySlug, areaBySlug, tagsOfArea } from '../site.config.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
@@ -39,8 +39,8 @@ function loadPosts() {
       subtitle: String(data.subtitle || ''),
       date,
       year,
+      area: areaBySlug(data.area) ? data.area : '',
       tags: Array.isArray(data.tags) ? data.tags.filter((t) => tagBySlug(t)) : [],
-      thread: threadBySlug(data.thread) ? data.thread : '',
       summary: String(data.summary || ''),
       featured,
       html: rendered.html,
@@ -55,13 +55,15 @@ function loadPosts() {
 
 const POSTS = loadPosts();
 const byYear = (year) => POSTS.filter((p) => p.year === year);
-const byThread = (slug) => POSTS.filter((p) => p.thread === slug);
+const byArea = (slug) => POSTS.filter((p) => p.area === slug);
 const byTag = (slug) => POSTS.filter((p) => p.tags.includes(slug));
 
 const fmtDate = (iso) => {
   const [y, m, d] = iso.split('-').map(Number);
   return `${y} 年 ${m} 月 ${d} 日`;
 };
+
+const MAIL = `mailto:${SITE.email}`;
 
 /* ------------------------------------------------------------------ */
 /* 页面骨架                                                            */
@@ -70,12 +72,9 @@ const fmtDate = (iso) => {
 const header = (rel, active) => `
 <a class="skip-link" href="#main">跳到正文</a>
 <header class="site-header">
-  <div class="wrap header-inner">
-    <a class="brand" href="${rel}index.html">
-      <span class="brand-mark">${SITE.name}</span>
-      <span class="brand-sub">四年 · 技术与哲学</span>
-    </a>
-    <nav class="site-nav" aria-label="主导航">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="${rel}index.html" aria-label="${escapeHtml(SITE.name)} 首页">${SITE.name}</a>
+    <div class="nav-links">
       ${SITE.nav
         .map((n) => {
           const href = rel + n.href.replace(/^\//, '');
@@ -83,26 +82,37 @@ const header = (rel, active) => `
           return `<a href="${href}"${current}>${n.label}</a>`;
         })
         .join('\n      ')}
-    </nav>
-    <button class="theme-toggle" type="button" aria-label="切换深浅色主题" title="切换主题">
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
       <span class="theme-toggle-icon"></span>
     </button>
-  </div>
+  </nav>
   <div class="reading-progress" aria-hidden="true"></div>
 </header>`;
 
 const footer = (rel) => `
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <p class="footer-brand">${SITE.name}</p>
-    <p class="footer-line">${SITE.tagline}</p>
-    <p class="footer-meta">
-      <span>© ${ACTS[0].year}–${ACTS[ACTS.length - 1].year} ${SITE.author}</span>
-      <span class="dot">·</span>
-      <a href="${rel}feed.xml">RSS</a>
-      <span class="dot">·</span>
-      <a href="${rel}archive.html">全部文章</a>
-    </p>
+    <div class="footer-brand">${SITE.name}</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        ${SITE.nav
+          .map((n) => `<a href="${rel}${n.href.replace(/^\//, '')}">${n.label}</a>`)
+          .join('')}
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        ${AREAS.map((a) => `<a href="${rel}area/${a.slug}.html">${escapeHtml(a.name)}</a>`).join('')}
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="${MAIL}">${SITE.email}</a>
+        <a href="${rel}feed.xml">RSS 订阅</a>
+        <a href="${rel}about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© ${new Date().getFullYear()} ${SITE.author} · 用 Markdown 写作，构建成静态页面</p>
   </div>
 </footer>`;
 
@@ -128,7 +138,7 @@ const layout = ({ title, description, content, rel = '', active = '', bodyClass 
 </head>
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
 ${header(rel, active)}
-<main id="main" class="wrap">
+<main id="main">
 ${content}
 </main>
 ${footer(rel)}
@@ -141,37 +151,35 @@ ${footer(rel)}
 /* 复用片段                                                            */
 /* ------------------------------------------------------------------ */
 
-const draftBadge = (p) => (p.featured ? '' : '<span class="badge badge-draft">待写</span>');
+const draftBadge = (p) => (p.featured ? '' : '<span class="badge">待写</span>');
 
-const postCard = (p, rel = '') => `
-<li class="post-item${p.featured ? '' : ' is-draft'}">
-  <a class="post-item-link" href="${rel}posts/${p.slug}.html">
-    <time datetime="${p.date}" class="post-item-date">${p.date}</time>
-    <div class="post-item-main">
-      <h3 class="post-item-title">${escapeHtml(p.title)} ${draftBadge(p)}</h3>
-      ${p.subtitle ? `<p class="post-item-sub">${escapeHtml(p.subtitle)}</p>` : ''}
-      <p class="post-item-summary">${escapeHtml(p.summary)}</p>
-      <div class="post-item-foot">
-        ${
-          p.thread
-            ? `<span class="mini-thread">${escapeHtml(threadBySlug(p.thread).name)}</span>`
-            : ''
-        }
-        ${p.tags
-          .map((t) => `<span class="mini-tag">${escapeHtml(tagBySlug(t).name)}</span>`)
-          .join('')}
-        ${p.featured ? `<span class="mini-read">约 ${p.minutes} 分钟</span>` : ''}
-      </div>
-    </div>
-  </a>
-</li>`;
+const card = (p, rel = '') => `
+<a class="card post-card${p.featured ? '' : ' is-draft'}" href="${rel}posts/${p.slug}.html">
+  <div class="post-card-meta">
+    <time datetime="${p.date}">${p.date}</time>
+    ${p.area ? `<span class="sep">·</span><span>${escapeHtml(areaBySlug(p.area).name)}</span>` : ''}
+    ${p.featured ? `<span class="sep">·</span><span>${p.minutes} 分钟</span>` : ''}
+  </div>
+  <h3 class="post-card-title">${escapeHtml(p.title)}${draftBadge(p)}</h3>
+  ${p.subtitle ? `<p class="post-card-sub">${escapeHtml(p.subtitle)}</p>` : ''}
+  <p class="post-card-summary">${escapeHtml(p.summary)}</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>`;
 
-const threadCard = (t, rel = '') => `
-<a class="thread-card" href="${rel}thread/${t.slug}.html">
-  <span class="thread-card-en">${escapeHtml(t.english)}</span>
-  <span class="thread-card-name">${escapeHtml(t.name)}</span>
-  <span class="thread-card-desc">${escapeHtml(t.desc)}</span>
-  <span class="thread-card-count">${byThread(t.slug).length} 篇</span>
+const rowCard = (p, rel = '') => `
+<a class="row-item${p.featured ? '' : ' is-draft'}" href="${rel}posts/${p.slug}.html">
+  <time datetime="${p.date}">${p.date}</time>
+  <span class="row-title">${escapeHtml(p.title)}${draftBadge(p)}</span>
+  <span class="row-summary">${escapeHtml(p.summary)}</span>
+  <span class="row-area">${p.area ? escapeHtml(areaBySlug(p.area).name) : ''}</span>
+</a>`;
+
+const areaCard = (a, rel = '') => `
+<a class="card area-card" href="${rel}area/${a.slug}.html">
+  <span class="area-card-en">${escapeHtml(a.english)}</span>
+  <span class="area-card-name">${escapeHtml(a.name)}</span>
+  <span class="area-card-desc">${escapeHtml(a.desc)}</span>
+  <span class="area-card-count">${byArea(a.slug).length} 篇 <span aria-hidden="true">›</span></span>
 </a>`;
 
 /* ------------------------------------------------------------------ */
@@ -180,61 +188,45 @@ const threadCard = (t, rel = '') => `
 
 function buildIndex() {
   const latest = POSTS.slice(0, 3);
-  const featuredCount = POSTS.filter((p) => p.featured).length;
-
-  const acts = ACTS.map((a) => {
-    const list = byYear(a.year);
-    const ratio = Math.min(100, Math.round((list.length / SITE.postsPerYear) * 100));
-    const first = list[list.length - 1];
-    return `
-  <a class="act-card" href="archive.html#y${a.year}">
-    <div class="act-card-head">
-      <span class="act-card-act">${a.act}</span>
-      <span class="act-card-year">${a.year}</span>
-    </div>
-    <h3 class="act-card-title">${escapeHtml(a.title)}</h3>
-    <p class="act-card-line">${escapeHtml(a.line)}</p>
-    <div class="act-card-bar"><span style="width:${ratio}%"></span></div>
-    <p class="act-card-meta">${list.length} 篇${first ? ` · 起于 ${first.date}` : ''}</p>
-  </a>`;
-  }).join('');
+  const [lead, ...rest] = latest;
+  const written = POSTS.filter((p) => p.featured).length;
 
   const content = `
 <section class="hero">
-  <p class="hero-eyebrow">一个工程师的四年笔记</p>
-  <h1 class="hero-title">${SITE.name}</h1>
-  <p class="hero-tagline">${escapeHtml(SITE.tagline)}</p>
-  <p class="hero-desc">${escapeHtml(SITE.description)}</p>
-  <div class="hero-stats">
-    <span><strong>${POSTS.length}</strong> 篇文章</span>
-    <span><strong>${ACTS.length}</strong> 个阶段</span>
-    <span><strong>${THREADS.length}</strong> 条脉络</span>
-    <span><strong>${featuredCount}</strong> 篇已完稿</span>
+  <p class="hero-eyebrow">Java 后端工程师的技术笔记</p>
+  <h1 class="hero-title">${escapeHtml(SITE.tagline)}</h1>
+  <p class="hero-sub">JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能——写在这里的，都是排查过、踩过坑、后来才想明白的东西。</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="archive.html">浏览全部文章</a>
+    <a class="btn btn-link" href="about.html">关于我 <span aria-hidden="true">›</span></a>
+  </div>
+  <p class="hero-meta">${POSTS.length} 篇文章 · ${AREAS.length} 个方向 · ${written} 篇已完稿 · 持续更新</p>
+</section>
+
+<section class="section section-gray">
+  <div class="section-head">
+    <h2>最新</h2>
+    <a class="section-link" href="archive.html">全部文章 <span aria-hidden="true">›</span></a>
+  </div>
+  <div class="lead-grid">
+    ${card(lead, '')}
+    <div class="lead-side">${rest.map((p) => card(p, '')).join('')}</div>
   </div>
 </section>
 
 <section class="section">
   <div class="section-head">
-    <h2>四年演化弧</h2>
-    <p>从“把代码写好”，到“为什么做这件事”</p>
+    <h2>技术地图</h2>
+    <a class="section-link" href="areas.html">看全部方向 <span aria-hidden="true">›</span></a>
   </div>
-  <div class="act-grid">${acts}</div>
+  <div class="area-grid">${AREAS.map((a) => areaCard(a)).join('')}</div>
 </section>
 
-<section class="section">
-  <div class="section-head">
-    <h2>最新三篇</h2>
-    <a class="section-more" href="archive.html">全部文章 →</a>
-  </div>
-  <ul class="post-list">${latest.map((p) => postCard(p)).join('')}</ul>
-</section>
-
-<section class="section">
-  <div class="section-head">
-    <h2>六条思想脉络</h2>
-    <p>文章按脉络成串，可以顺着一条线往下读</p>
-  </div>
-  <div class="thread-grid">${THREADS.map((t) => threadCard(t)).join('')}</div>
+<section class="section section-dark contact">
+  <h2 class="contact-title">想聊点什么？</h2>
+  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊 Java，都欢迎来信。</p>
+  <a class="btn btn-primary btn-lg" href="${MAIL}">${SITE.email}</a>
+  <p class="contact-meta">一般两三天内回复 · 也可以直接<a href="archive.html">翻翻文章</a></p>
 </section>
 `;
 
@@ -253,122 +245,131 @@ function buildIndex() {
 function buildArchive() {
   const years = [...new Set(POSTS.map((p) => p.year))].sort((a, b) => b - a);
   const sections = years
-    .map((year) => {
-      const act = actByYear(year);
-      const list = byYear(year);
-      const ratio = Math.min(100, Math.round((list.length / SITE.postsPerYear) * 100));
-      return `
+    .map(
+      (year) => `
   <section class="year-block" id="y${year}">
     <div class="year-head">
-      <div class="year-head-left">
-        <span class="year-num">${year}</span>
-        <span class="year-act">${act ? `${act.act} · ${escapeHtml(act.title)}` : ''}</span>
-      </div>
-      <div class="year-progress" title="${list.length} / ${SITE.postsPerYear} 篇">
-        <span style="width:${ratio}%"></span>
-      </div>
+      <h2 class="year-num">${year}</h2>
+      <span class="year-count">${byYear(year).length} 篇</span>
     </div>
-    ${act ? `<p class="year-line">${escapeHtml(act.line)}</p>` : ''}
-    <ul class="post-list">${list.map((p) => postCard(p)).join('')}</ul>
-  </section>`;
-    })
+    <div class="row-list">${byYear(year).map((p) => rowCard(p)).join('')}</div>
+  </section>`
+    )
     .join('');
 
   const content = `
 <section class="page-head">
-  <h1>归档</h1>
-  <p>${POSTS.length} 篇文章，按年份倒序。带“待写”标记的是已定题、正文还在写作中的篇目。</p>
+  <h1>文章</h1>
+  <p>共 ${POSTS.length} 篇，按时间倒序。带“待写”标记的是已经定题、正文还在写作中的篇目。</p>
 </section>
-${sections}
+<div class="archive-body">${sections}</div>
 `;
 
-  return layout({ title: `归档 · ${SITE.name}`, content, active: '归档' });
+  return layout({ title: `文章 · ${SITE.name}`, content, active: '文章' });
 }
 
 /* ------------------------------------------------------------------ */
-/* 主题页                                                              */
+/* 方向与标签                                                          */
 /* ------------------------------------------------------------------ */
 
-function buildTags() {
-  const groups = ['技术', '哲学', '成长'];
-  const groupHtml = groups
-    .map((g) => {
-      const tags = TAGS.filter((t) => t.group === g);
-      if (!tags.length) return '';
-      return `
-  <section class="section">
-    <div class="section-head"><h2>${g}</h2></div>
-    <div class="tag-grid">
-      ${tags
-        .map((t) => {
-          const n = byTag(t.slug).length;
-          return `
-      <a class="tag-card" href="tag/${t.slug}.html">
-        <span class="tag-card-name">${escapeHtml(t.name)}</span>
-        <span class="tag-card-count">${n}</span>
-        <span class="tag-card-desc">${escapeHtml(t.desc)}</span>
-      </a>`;
-        })
-        .join('')}
-    </div>
-  </section>`;
-    })
-    .join('');
-
+function buildAreas() {
   const content = `
 <section class="page-head">
-  <h1>主题</h1>
-  <p>一种横向的读法：六大思想脉络串起四年，标签则记录技术在具体处的落点。</p>
+  <h1>方向</h1>
+  <p>六个方向，也是站内文章的六个入口。点进去可以看到这个方向下的全部文章和细分标签。</p>
 </section>
-<section class="section">
-  <div class="section-head"><h2>六大脉络</h2></div>
-  <div class="thread-grid thread-grid-wide">${THREADS.map((t) => threadCard(t)).join('')}</div>
-</section>
-${groupHtml}
+${AREAS.map(
+  (a) => `
+<section class="section area-section">
+  <div class="area-section-head">
+    <h2>${escapeHtml(a.name)}</h2>
+    <span class="area-section-en">${escapeHtml(a.english)}</span>
+  </div>
+  <p class="area-section-desc">${escapeHtml(a.desc)}</p>
+  <div class="chip-row">
+    ${tagsOfArea(a.slug)
+      .map(
+        (t) =>
+          `<a class="chip" href="tag/${t.slug}.html">${escapeHtml(t.name)}<span class="chip-count">${byTag(t.slug).length}</span></a>`
+      )
+      .join('')}
+    <a class="chip chip-ghost" href="area/${a.slug}.html">全部 ${byArea(a.slug).length} 篇 <span aria-hidden="true">›</span></a>
+  </div>
+</section>`
+).join('')}
 `;
+  return layout({ title: `方向 · ${SITE.name}`, content, active: '方向' });
+}
 
-  return layout({ title: `主题 · ${SITE.name}`, content, active: '主题' });
+function buildAreaPage(area) {
+  const list = byArea(area.slug);
+  const content = `
+<section class="page-head">
+  <p class="crumb"><a href="../areas.html">方向</a></p>
+  <h1>${escapeHtml(area.name)}</h1>
+  <p class="page-head-en">${escapeHtml(area.english)}</p>
+  <p>${escapeHtml(area.desc)}</p>
+  <p class="page-head-meta">共 ${list.length} 篇</p>
+</section>
+<div class="archive-body">
+  <div class="row-list">${list.map((p) => rowCard(p, '../')).join('')}</div>
+</div>
+`;
+  return layout({
+    title: `${area.name} · ${SITE.name}`,
+    description: area.desc,
+    content,
+    rel: '../',
+    active: '方向',
+  });
+}
+
+function buildTags() {
+  const content = `
+<section class="page-head">
+  <h1>标签</h1>
+  <p>比方向更细的一层：具体到某个技术点。</p>
+</section>
+${AREAS.map((a) => {
+  const tags = tagsOfArea(a.slug);
+  if (!tags.length) return '';
+  return `
+<section class="section">
+  <div class="area-section-head"><h2>${escapeHtml(a.name)}</h2></div>
+  <div class="chip-row">
+    ${tags
+      .map(
+        (t) =>
+          `<a class="chip" href="tag/${t.slug}.html">${escapeHtml(t.name)}<span class="chip-count">${byTag(t.slug).length}</span></a>`
+      )
+      .join('')}
+  </div>
+</section>`;
+}).join('')}
+`;
+  return layout({ title: `标签 · ${SITE.name}`, content, active: '方向' });
 }
 
 function buildTagPage(tag) {
   const list = byTag(tag.slug);
+  const area = areaBySlug(tag.area);
   const content = `
 <section class="page-head">
-  <p class="crumb"><a href="../tags.html">主题</a> / ${escapeHtml(tag.group)}</p>
+  <p class="crumb"><a href="../tags.html">标签</a> · <a href="../area/${area.slug}.html">${escapeHtml(area.name)}</a></p>
   <h1>${escapeHtml(tag.name)}</h1>
   <p>${escapeHtml(tag.desc)}</p>
   <p class="page-head-meta">共 ${list.length} 篇</p>
 </section>
-<ul class="post-list">${list.map((p) => postCard(p, '../')).join('')}</ul>
+<div class="archive-body">
+  <div class="row-list">${list.map((p) => rowCard(p, '../')).join('')}</div>
+</div>
 `;
   return layout({
     title: `${tag.name} · ${SITE.name}`,
     description: tag.desc,
     content,
     rel: '../',
-    active: '主题',
-  });
-}
-
-function buildThreadPage(thread) {
-  const list = byThread(thread.slug);
-  const content = `
-<section class="page-head">
-  <p class="crumb"><a href="../tags.html">主题</a> / 脉络</p>
-  <h1>${escapeHtml(thread.name)}</h1>
-  <p class="page-head-en">${escapeHtml(thread.english)}</p>
-  <p class="thread-lead">${escapeHtml(thread.desc)}</p>
-  <p class="thread-sources">相关的思想资源：${thread.sources.map((s) => `<span>${escapeHtml(s)}</span>`).join('')}</p>
-  <p class="page-head-meta">共 ${list.length} 篇</p>
-</section>
-<ul class="post-list">${list.map((p) => postCard(p, '../')).join('')}</ul>
-`;
-  return layout({
-    title: `${thread.name} · ${SITE.name}`,
-    description: thread.desc,
-    content,
-    rel: '../',
-    active: '主题',
+    active: '方向',
   });
 }
 
@@ -377,31 +378,27 @@ function buildThreadPage(thread) {
 /* ------------------------------------------------------------------ */
 
 function relatedPosts(post) {
-  const sameThread = POSTS.filter((p) => p.slug !== post.slug && post.thread && p.thread === post.thread);
-  const sameYear = POSTS.filter(
-    (p) => p.slug !== post.slug && p.year === post.year && !sameThread.includes(p)
+  const sameArea = POSTS.filter((p) => p.slug !== post.slug && post.area && p.area === post.area);
+  const sameTag = POSTS.filter(
+    (p) => p.slug !== post.slug && !sameArea.includes(p) && p.tags.some((t) => post.tags.includes(t))
   );
-  return [...sameThread, ...sameYear].slice(0, 3);
+  return [...sameArea, ...sameTag].slice(0, 3);
 }
 
 function buildPost(post) {
   const idx = POSTS.findIndex((p) => p.slug === post.slug);
-  const newer = POSTS[idx - 1]; // 数组按时间倒序
+  const newer = POSTS[idx - 1];
   const older = POSTS[idx + 1];
-  const act = actByYear(post.year);
-  const thread = post.thread ? threadBySlug(post.thread) : null;
+  const area = post.area ? areaBySlug(post.area) : null;
 
   const toc =
-    post.headings.length >= 3
+    post.headings.length >= 4
       ? `
   <aside class="toc" aria-label="目录">
     <p class="toc-title">目录</p>
     <ul>
       ${post.headings
-        .map(
-          (h) =>
-            `<li class="toc-l${h.level}"><a href="#${h.id}">${escapeHtml(h.text)}</a></li>`
-        )
+        .map((h) => `<li class="toc-l${h.level}"><a href="#${h.id}">${escapeHtml(h.text)}</a></li>`)
         .join('')}
     </ul>
   </aside>`
@@ -409,7 +406,7 @@ function buildPost(post) {
 
   const draftNote = post.featured
     ? ''
-    : `<p class="draft-note">这篇还处在“定题 + 摘要”阶段，正文仍在写作中。下面是它要处理的问题。</p>`;
+    : `<p class="draft-note">这篇还在写作中。下面是它要处理的问题。</p>`;
 
   const related = relatedPosts(post);
 
@@ -418,26 +415,18 @@ function buildPost(post) {
   <div class="post-inner">
   <header class="post-head">
     <div class="post-kicker">
-      ${act ? `<span class="badge badge-act">${act.act} · ${escapeHtml(act.title)}</span>` : ''}
-      ${
-        thread
-          ? `<a class="badge badge-thread" href="../thread/${thread.slug}.html">脉络 · ${escapeHtml(thread.name)}</a>`
-          : ''
-      }
-      ${draftNote ? '<span class="badge badge-draft">待写</span>' : ''}
+      ${area ? `<a class="badge badge-area" href="../area/${area.slug}.html">${escapeHtml(area.name)}</a>` : ''}
+      ${post.tags
+        .map((t) => `<a class="badge" href="../tag/${t}.html">${escapeHtml(tagBySlug(t).name)}</a>`)
+        .join('')}
+      ${post.featured ? '' : '<span class="badge badge-draft">待写</span>'}
     </div>
     <h1 class="post-title">${escapeHtml(post.title)}</h1>
     ${post.subtitle ? `<p class="post-subtitle">${escapeHtml(post.subtitle)}</p>` : ''}
-    <div class="post-meta">
+    <p class="post-meta">
       <time datetime="${post.date}">${fmtDate(post.date)}</time>
-      ${post.featured ? `<span class="dot">·</span><span>约 ${post.minutes} 分钟</span>` : ''}
-      <span class="dot">·</span>
-      <span class="post-meta-tags">
-        ${post.tags
-          .map((t) => `<a href="../tag/${t}.html">${escapeHtml(tagBySlug(t).name)}</a>`)
-          .join('')}
-      </span>
-    </div>
+      ${post.featured ? `<span class="sep">·</span>约 ${post.minutes} 分钟` : ''}
+    </p>
   </header>
 
   <div class="post-layout">
@@ -449,24 +438,26 @@ function buildPost(post) {
   </div>
 
   ${
-    thread
+    area
       ? `
-  <aside class="thread-callout">
-    <p class="thread-callout-label">这条脉络</p>
-    <p class="thread-callout-name">${escapeHtml(thread.name)}</p>
-    <p class="thread-callout-desc">${escapeHtml(thread.desc)}</p>
-    <a class="thread-callout-link" href="../thread/${thread.slug}.html">顺着这条线读下去 →</a>
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">${escapeHtml(area.name)}</p>
+    <p class="area-callout-desc">${escapeHtml(area.desc)}</p>
+    <a class="btn btn-link" href="../area/${area.slug}.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
   </aside>`
       : ''
   }
 
   <nav class="post-nav" aria-label="文章导航">
-    <div class="post-nav-item">
-      ${newer ? `<span class="post-nav-label">更新的一篇</span><a href="${newer.slug}.html">${escapeHtml(newer.title)}</a>` : '<span class="post-nav-label">这是最新的一篇</span>'}
-    </div>
-    <div class="post-nav-item">
-      ${older ? `<span class="post-nav-label">更早的一篇</span><a href="${older.slug}.html">${escapeHtml(older.title)}</a>` : '<span class="post-nav-label">这是最早的一篇</span>'}
-    </div>
+    <a class="post-nav-item" href="${newer ? `${newer.slug}.html` : '../archive.html'}">
+      <span class="post-nav-label">${newer ? '更新的一篇' : '回到文章列表'}</span>
+      <span class="post-nav-title">${escapeHtml(newer ? newer.title : '全部文章')}</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="${older ? `${older.slug}.html` : '../archive.html'}">
+      <span class="post-nav-label">${older ? '更早的一篇' : '回到文章列表'}</span>
+      <span class="post-nav-title">${escapeHtml(older ? older.title : '全部文章')}</span>
+    </a>
   </nav>
   </div>
 </article>
@@ -474,9 +465,9 @@ function buildPost(post) {
 ${
   related.length
     ? `
-<section class="section related">
+<section class="section section-gray">
   <div class="section-head"><h2>接着读</h2></div>
-  <ul class="post-list">${related.map((p) => postCard(p, '../')).join('')}</ul>
+  <div class="card-grid">${related.map((p) => card(p, '../')).join('')}</div>
 </section>`
     : ''
 }
@@ -495,94 +486,36 @@ ${
 /* 关于                                                                */
 /* ------------------------------------------------------------------ */
 
-function growthChart() {
-  const w = 680;
-  const h = 240;
-  const x = (i) => 70 + i * 180;
-  const y = (v) => 210 - v * 2;
-  const engineering = [85, 78, 62, 55];
-  const philosophy = [15, 32, 58, 88];
-  const line = (values, cls) =>
-    `<polyline class="chart-line ${cls}" points="${values
-      .map((v, i) => `${x(i)},${y(v)}`)
-      .join(' ')}" />`;
-  const dots = (values, cls) =>
-    values.map((v, i) => `<circle class="chart-dot ${cls}" cx="${x(i)}" cy="${y(v)}" r="4" />`).join('');
-
-  return `
-<figure class="chart">
-  <svg viewBox="0 0 ${w} ${h}" role="img" aria-label="四年里工程与哲学两条关注线的变化">
-    <g class="chart-grid">
-      ${[10, 60, 110, 160, 210].map((gy) => `<line x1="40" y1="${gy}" x2="${w - 20}" y2="${gy}" />`).join('')}
-    </g>
-    ${ACTS.map(
-      (a, i) =>
-        `<text class="chart-year" x="${x(i)}" y="232" text-anchor="middle">${a.year}</text>`
-    ).join('')}
-    ${line(engineering, 'is-eng')}
-    ${line(philosophy, 'is-phil')}
-    ${dots(engineering, 'is-eng')}
-    ${dots(philosophy, 'is-phil')}
-  </svg>
-  <figcaption>
-    <span class="legend legend-eng">写代码的浓度</span>
-    <span class="legend legend-phil">追问“为什么”的浓度</span>
-  </figcaption>
-</figure>`;
-}
-
 function buildAbout() {
-  const acts = ACTS.map(
-    (a) => `
-  <li class="timeline-item">
-    <span class="timeline-year">${a.year}</span>
-    <div class="timeline-body">
-      <h3>${a.act} · ${escapeHtml(a.title)}</h3>
-      <p class="timeline-line">${escapeHtml(a.line)}</p>
-      <p>${escapeHtml(a.note)}</p>
-    </div>
-  </li>`
-  ).join('');
+  const stack = [
+    ['语言与运行时', 'Java 8 → 21、JVM 内存与 GC、JIT、虚拟线程'],
+    ['框架', 'Spring / Spring Boot / Spring Cloud、MyBatis'],
+    ['数据与中间件', 'MySQL、Redis、Kafka / RocketMQ、Elasticsearch'],
+    ['架构', '微服务、网关、限流熔断、分布式事务与一致性'],
+    ['工程', 'Maven / Gradle、JUnit、CI/CD、可观测性'],
+  ];
 
   const content = `
 <section class="page-head">
   <h1>关于</h1>
-  <p class="page-head-en">${SITE.name} · 四年 · 技术与哲学</p>
+  <p class="page-head-en">Java Backend · 技术笔记</p>
 </section>
 
 <section class="section prose">
-  <p>这个站点是我给自己做的四年盘点：从 ${ACTS[0].year} 年开始，每年十篇左右，写软件工程里那些真正费过脑子的地方，也写它们后来怎么把我推向了哲学。</p>
-  <p>我原本以为这是一条技术成长路径——从写脚本到写服务，从写服务到设计系统。写到第三年才发现，真正在变的是问题本身：一开始问“这个怎么实现”，后来问“这个该不该存在”，最后问“我为什么要做技术”。</p>
-  <p>所以这里的文章有两种读法。按年份读是一份成长记录；按脉络读，是六条被反复绕回来的问题线。哪条都不是主线——它们互为背景。</p>
+  <p>这里放的是我在 Java 后端这条线上的笔记。绝大多数内容来自两类时刻：线上出了问题、排查到深夜才发现是一个早就该想清楚的地方；或者读源码读到某处，突然明白一个以前只是“背下来”的结论到底为什么成立。</p>
+  <p>我尽量只写自己真正处理过的部分。所以这里的文章不太像教程，更像排查记录和思考过程的整理：先说清问题是怎么出现的，再说当时有哪些选择，最后才说为什么选了这一个。</p>
+  <p>站点按六个方向组织。文章会一直更新，没有固定的节奏——想清楚了就写，写不明白就先放着，页面上会标“待写”。</p>
 </section>
 
-<section class="section">
-  <div class="section-head"><h2>成长曲线</h2></div>
-  ${growthChart()}
-</section>
-
-<section class="section">
-  <div class="section-head"><h2>四年时间线</h2></div>
-  <ul class="timeline">${acts}</ul>
-</section>
-
-<section class="section">
-  <div class="section-head"><h2>我在读什么</h2></div>
-  <div class="reading-grid">
-    ${[
-      ['技术的本质', '布莱恩·阿瑟', '把技术当作一个自我繁殖的系统来读，很多工程直觉会突然有出处。'],
-      ['技术与时间', '贝尔纳·斯蒂格勒', '关于“技术物”最难但最值得的一本，读到一半会想重写自己所有的架构文档。'],
-      ['庄子', '—', '庖丁解牛是我读过最好的关于“熟练”的段落，比任何一篇讲心流的文章都准。'],
-      ['倦怠社会', '韩炳哲', '短小锋利，用来解释为什么功能越加越多、人越做越累。'],
-      ['传习录', '王阳明', '知行合一不是口号，是对“懂了但没做”这种状态的精确诊断。'],
-      ['人月神话', '布鲁克斯', '每年重读一次，每年都被打中一次。'],
-    ]
+<section class="section section-gray">
+  <div class="section-head"><h2>技术栈</h2></div>
+  <div class="stack-grid">
+    ${stack
       .map(
-        ([t, a, note]) => `
-    <div class="reading-item">
-      <p class="reading-title">${escapeHtml(t)}</p>
-      <p class="reading-author">${escapeHtml(a)}</p>
-      <p class="reading-note">${escapeHtml(note)}</p>
+        ([title, items]) => `
+    <div class="card stack-card">
+      <p class="stack-title">${escapeHtml(title)}</p>
+      <p class="stack-items">${escapeHtml(items)}</p>
     </div>`
       )
       .join('')}
@@ -590,16 +523,21 @@ function buildAbout() {
 </section>
 
 <section class="section">
-  <div class="section-head">
-    <h2>怎么读这个站</h2>
-  </div>
+  <div class="section-head"><h2>怎么读这个站</h2></div>
   <div class="prose">
     <ul>
-      <li><strong>想快速了解全貌</strong>：从「<a href="archive.html">归档</a>」页按年份扫一遍标题和摘要。</li>
-      <li><strong>带着问题来</strong>：去「<a href="tags.html">主题</a>」页选一条脉络，顺着读到底。</li>
-      <li><strong>想看完整的思考</strong>：标了“待写”的是只有摘要的规划篇目，其余是已完稿的正文。</li>
+      <li>想按时间看：去<a href="archive.html">文章列表</a>，按年份翻。</li>
+      <li>想按技术点看：去<a href="areas.html">方向</a>，六个方向下有更细的标签。</li>
+      <li>只想找某个词：用<a href="search.html">搜索</a>，全文检索在你的浏览器里完成。</li>
+      <li>标了“待写”的是已经定题、正文还在写作中，点进去能看到要处理的问题。</li>
     </ul>
   </div>
+</section>
+
+<section class="section section-dark contact">
+  <h2 class="contact-title">联系我</h2>
+  <p class="contact-sub">技术问题、源码疑问、工作机会，或者只是想聊聊 Java，都欢迎来信。</p>
+  <a class="btn btn-primary btn-lg" href="${MAIL}">${SITE.email}</a>
 </section>
 `;
 
@@ -614,14 +552,14 @@ function buildSearch() {
   const content = `
 <section class="page-head">
   <h1>搜索</h1>
-  <p>全文检索，完全在你的浏览器里完成。可以搜标题、摘要、标签，也可以搜正文里的词。</p>
+  <p>全文检索，完全在你的浏览器里完成。标题、摘要、标签和正文都可以搜。</p>
 </section>
 <section class="section">
   <div class="search-box">
-    <input id="search-input" type="search" placeholder="试试搜「复杂度」「注意力」「海德格尔」…" autocomplete="off" aria-label="搜索文章">
+    <input id="search-input" type="search" placeholder="试试搜「线程池」「G1」「循环依赖」「索引失效」…" autocomplete="off" aria-label="搜索文章">
   </div>
   <p class="search-status" id="search-status" aria-live="polite"></p>
-  <ul class="post-list" id="search-results"></ul>
+  <div class="row-list" id="search-results"></div>
 </section>
 `;
   const html = layout({ title: `搜索 · ${SITE.name}`, content, active: '搜索' });
@@ -644,6 +582,7 @@ function buildFeed() {
     <link>${SITE.url}/posts/${p.slug}.html</link>
     <guid isPermaLink="true">${SITE.url}/posts/${p.slug}.html</guid>
     <pubDate>${new Date(`${p.date}T09:00:00+08:00`).toUTCString()}</pubDate>
+    <category>${escapeHtml(p.area ? areaBySlug(p.area).name : '')}</category>
     <description>${escapeHtml(p.summary)}</description>
   </item>`
     )
@@ -675,10 +614,13 @@ ${urls
 
 function build404() {
   const content = `
-<section class="page-head">
-  <h1>404</h1>
-  <p>这个地址上没有东西。也许是链接写错了，也许是那篇文章还没被写出来。</p>
-  <p class="page-head-meta"><a href="index.html">回到首页</a> · <a href="archive.html">看看归档</a></p>
+<section class="page-head page-head-center">
+  <h1>页面不存在</h1>
+  <p>这个地址上没有东西。也许是链接写错了，也许是那篇文章还没写出来。</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="index.html">回到首页</a>
+    <a class="btn btn-link" href="archive.html">全部文章 <span aria-hidden="true">›</span></a>
+  </div>
 </section>`;
   return layout({ title: `页面不存在 · ${SITE.name}`, content });
 }
@@ -715,6 +657,8 @@ write('index.html', buildIndex());
 addUrl('/index.html');
 write('archive.html', buildArchive());
 addUrl('/archive.html');
+write('areas.html', buildAreas());
+addUrl('/areas.html');
 write('tags.html', buildTags());
 addUrl('/tags.html');
 write('about.html', buildAbout());
@@ -723,14 +667,14 @@ write('search.html', buildSearch());
 addUrl('/search.html');
 write('404.html', build404());
 
+AREAS.forEach((a) => {
+  write(`area/${a.slug}.html`, buildAreaPage(a));
+  addUrl(`/area/${a.slug}.html`);
+});
+
 TAGS.forEach((t) => {
   write(`tag/${t.slug}.html`, buildTagPage(t));
   addUrl(`/tag/${t.slug}.html`);
-});
-
-THREADS.forEach((t) => {
-  write(`thread/${t.slug}.html`, buildThreadPage(t));
-  addUrl(`/thread/${t.slug}.html`);
 });
 
 POSTS.forEach((p) => {
@@ -743,7 +687,6 @@ write('sitemap.xml', buildSitemap([...urls, { path: '/', lastmod: POSTS[0]?.date
 write('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE.url}/sitemap.xml\n`);
 write('.nojekyll', '');
 
-// 前端搜索用的索引
 const searchIndex = POSTS.map((p) => ({
   title: p.title,
   subtitle: p.subtitle,
@@ -751,8 +694,8 @@ const searchIndex = POSTS.map((p) => ({
   date: p.date,
   year: p.year,
   summary: p.summary,
+  area: p.area ? areaBySlug(p.area).name : '',
   tags: p.tags.map((t) => tagBySlug(t).name),
-  thread: p.thread ? threadBySlug(p.thread).name : '',
   draft: !p.featured,
   body: [p.headings.map((h) => h.text).join(' '), p.text].join(' ').slice(0, 900),
 }));
@@ -761,5 +704,5 @@ write('assets/search-index.json', JSON.stringify(searchIndex, null, 0));
 const drafts = POSTS.filter((p) => !p.featured).length;
 console.log(`✓ 构建完成 → ${DIST}`);
 console.log(`  文章 ${POSTS.length} 篇（完稿 ${POSTS.length - drafts} / 待写 ${drafts}）`);
-console.log(`  页面 ${urls.length + 1} 个 · 标签 ${TAGS.length} · 脉络 ${THREADS.length}`);
+console.log(`  页面 ${urls.length + 1} 个 · 方向 ${AREAS.length} · 标签 ${TAGS.length}`);
 console.log(`  年份 ${[...new Set(POSTS.map((p) => p.year))].sort().join(' / ')}`);

@@ -30,7 +30,7 @@
     var title = item.title.toLowerCase();
     var summary = item.summary.toLowerCase();
     var bodyText = item.body.toLowerCase();
-    var tags = (item.tags.concat(item.thread ? [item.thread] : []).join(' ')).toLowerCase();
+    var tags = (item.tags.concat(item.area ? [item.area] : []).join(' ')).toLowerCase();
     var total = 0;
     var all = true;
 
@@ -72,27 +72,22 @@
       .map(function (h) {
         var p = h.item;
         return (
-          '<li class="post-item' +
+          '<a class="row-item' +
           (p.draft ? ' is-draft' : '') +
-          '"><a class="post-item-link" href="' +
+          '" href="' +
           p.url +
-          '"><time class="post-item-date">' +
+          '"><time datetime="' +
           p.date +
-          '</time><div class="post-item-main"><h3 class="post-item-title">' +
+          '">' +
+          p.date +
+          '</time><span class="row-title">' +
           highlight(p.title, terms) +
-          (p.draft ? ' <span class="badge badge-draft">待写</span>' : '') +
-          '</h3>' +
-          (p.subtitle ? '<p class="post-item-sub">' + escapeHtml(p.subtitle) + '</p>' : '') +
-          '<p class="post-item-summary">' +
+          (p.draft ? '<span class="badge badge-draft">待写</span>' : '') +
+          '</span><span class="row-summary">' +
           highlight(p.summary, terms) +
-          '</p><div class="post-item-foot">' +
-          (p.thread ? '<span class="mini-thread">' + escapeHtml(p.thread) + '</span>' : '') +
-          p.tags
-            .map(function (t) {
-              return '<span class="mini-tag">' + escapeHtml(t) + '</span>';
-            })
-            .join('') +
-          '</div></div></a></li>'
+          '</span><span class="row-area">' +
+          escapeHtml(p.area || '') +
+          '</span></a>'
         );
       })
       .join('');

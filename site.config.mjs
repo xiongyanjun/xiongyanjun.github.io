@@ -1,124 +1,84 @@
-// 站点级配置：metadata、导航、分类体系、四年演化弧。
+// 站点级配置：metadata、导航、方向（技术地图）、标签。
 // 内容只写在 content/posts/*.md 里，这里只放“框架”类的东西。
 
 export const SITE = {
   name: '🐻‍❄️🦘🐎',
   author: '🐻‍❄️🦘🐎',
+  email: 'xiongyanjun97@qq.com',
   // 部署后改成你自己的地址（影响 RSS / sitemap / 绝对链接）
   url: 'https://example.github.io',
-  tagline: '写了四年软件，然后开始追问为什么。',
+  tagline: '把 Java 写清楚。',
   description:
-    '一个工程师的四年笔记：从工程基本功、系统复杂度、AI 时代的重估，到对技术本身为何存在的追问。',
+    '一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。',
   locale: 'zh-CN',
-  // 建站起始年份，用于归档分组
-  startYear: 2023,
-  // 每年目标篇数，显示在归档页
-  postsPerYear: 10,
   nav: [
     { href: '/index.html', label: '首页' },
-    { href: '/archive.html', label: '归档' },
-    { href: '/tags.html', label: '主题' },
+    { href: '/archive.html', label: '文章' },
+    { href: '/areas.html', label: '方向' },
     { href: '/about.html', label: '关于' },
     { href: '/search.html', label: '搜索' },
   ],
 };
 
-// 四幕结构：首页与关于页用它画“成长曲线”
-export const ACTS = [
+// 技术地图：六个方向，也是站内文章的第一层分类
+export const AREAS = [
   {
-    year: 2023,
-    act: '第一幕',
-    title: '工程基本功',
-    line: '我学会了把东西做出来，也学会了删代码。',
-    note:
-      '刚入行那两年，衡量自己的唯一尺子是“代码写得好不好”。写了大量关于分层、缓存、测试、可观测性的笔记，但它们背后其实是同一个问题：怎么把不确定性关进笼子里。',
+    slug: 'jvm',
+    name: 'JVM 与性能',
+    english: 'JVM & Performance',
+    desc: '内存结构、GC、JIT、压测与调优。大部分“莫名其妙”的问题，答案最后都落在这里。',
   },
   {
-    year: 2024,
-    act: '第二幕',
-    title: '系统与协作',
-    line: '复杂度不可消除，只能安放；我学会了说“不”。',
-    note:
-      '从写代码的人变成被系统包围的人。开始发现技术问题的尽头常常是人：承诺、语言、注意力预算、以及“不加这个功能”的勇气。',
+    slug: 'concurrency',
+    name: '并发与多线程',
+    english: 'Concurrency',
+    desc: '线程池、锁、内存模型、虚拟线程，以及那些只在压测流量下才会露头的问题。',
   },
   {
-    year: 2025,
-    act: '第三幕',
-    title: 'AI 时代的重估',
-    line: '工具变了，人的价值要重新定位。',
-    note:
-      '模型开始写代码之后，很多自以为牢固的东西松动了。这一年写下的几乎都是重新称重：什么是可验证的、什么是不可让渡的、我到底在提供什么价值。',
+    slug: 'spring',
+    name: 'Spring 与生态',
+    english: 'Spring',
+    desc: 'IoC、AOP、自动配置、事务传播，以及跨版本升级要付的账。',
   },
   {
-    year: 2026,
-    act: '第四幕',
-    title: '追问技术为何',
-    line: '我学会了做减法，也学会了问“这值得吗”。',
-    note:
-      '哲学从一个借来的比喻，变成了正面的工作方法。开始读海德格尔、西蒙东、韩炳哲，也回头读庄子与王阳明——技术是手艺，手艺是修行。',
-  },
-];
-
-// 六大思想脉络：文章按脉络成串，读者可以顺着一条线读下去
-export const THREADS = [
-  {
-    slug: 'tools-and-humans',
-    name: '工具与人',
-    english: 'Tools & Humans',
-    desc: '工具不是中性的，它在使用中重写使用者。编辑器、框架、大模型，都是同一类问题的不同面孔。',
-    sources: ['麦克卢汉', '海德格尔', '伊里奇', '西蒙东'],
+    slug: 'data',
+    name: '数据与中间件',
+    english: 'Data & Middleware',
+    desc: 'MySQL、Redis、消息队列。它们决定了应用层能怎么写、不能怎么写。',
   },
   {
-    slug: 'language-and-meaning',
-    name: '语言与意义',
-    english: 'Language & Meaning',
-    desc: '领域建模、接口设计、提示词，本质上都是“让一个词在特定共同体内获得确定含义”的努力。',
-    sources: ['维特根斯坦', '诠释学', 'DDD'],
+    slug: 'architecture',
+    name: '分布式与架构',
+    english: 'Distributed Systems',
+    desc: '拆分与合并、一致性、限流熔断、故障隔离——把不确定性放在看得见的地方。',
   },
   {
-    slug: 'complexity-and-uncertainty',
-    name: '复杂度与不确定性',
-    english: 'Complexity & Uncertainty',
-    desc: '分布式系统是这门学问的技术化身：我们可以设计边界，但无法取消涌现。',
-    sources: ['西蒙', '复杂系统', '涌现论'],
-  },
-  {
-    slug: 'craft-and-practice',
-    name: '技艺与练习',
-    english: 'Craft & Practice',
-    desc: '从看得见的招式到看不见的手感，技艺的核心是那些说不出但骗不了人的东西。',
-    sources: ['庄子', '柏拉图 technē', '波兰尼 默会知识'],
-  },
-  {
-    slug: 'attention-and-self',
-    name: '注意力与自我',
-    english: 'Attention & Self',
-    desc: '信息不缺，注意力缺。所有关于效率的讨论，最后都落回“我把生命投在哪里”。',
-    sources: ['韩炳哲', '赫伯特·西蒙', '尼尔·波兹曼'],
-  },
-  {
-    slug: 'practice-and-ethics',
-    name: '实践伦理',
-    english: 'Practice & Ethics',
-    desc: '知道不等于做到，做到才叫知道。技术选择的每一个便利，背后都有人替你付账。',
-    sources: ['王阳明', '实用主义', '技术伦理'],
+    slug: 'craft',
+    name: '工程与判断',
+    english: 'Engineering Craft',
+    desc: '测试、构建、可观测性、代码评审，以及一个工程师如何形成自己的判断。',
   },
 ];
 
-// 标签体系：刻意收敛到 10 个，避免每个词都变成一个孤儿页面
+// 细粒度标签：刻意收敛，避免每个词都变成一个孤儿页面
 export const TAGS = [
-  { slug: 'engineering-practice', name: '工程实践', group: '技术', desc: '日常编码、测试、可维护性，以及那些反复踩的坑。' },
-  { slug: 'architecture-systems', name: '架构与系统', group: '技术', desc: '分层、抽象、边界、领域模型。' },
-  { slug: 'distributed-reliability', name: '分布式与可靠性', group: '技术', desc: '一致性、幂等、故障与复盘。' },
-  { slug: 'collaboration', name: '协作与团队', group: '技术', desc: '评审、文档、会议与工程文化。' },
-  { slug: 'tools-craft', name: '工具与手艺', group: '技术', desc: '工具如何反向塑造使用它的人。' },
-  { slug: 'ai-engineering', name: 'AI 工程', group: '技术', desc: 'LLM 落地、上下文工程、评估与 RAG。' },
-  { slug: 'ai-and-human', name: 'AI 与人的边界', group: '技术', desc: '能动性、信任、验证成本与职业价值。' },
-  { slug: 'tech-and-philosophy', name: '技术与哲学', group: '哲学', desc: '用哲学问题重新描述工程问题。' },
-  { slug: 'eastern-philosophy', name: '东方哲学', group: '哲学', desc: '庄子、王阳明，以及“做得好的时候是什么感觉”。' },
-  { slug: 'growth-reflections', name: '成长回顾', group: '成长', desc: '每年一次的自我盘点。' },
+  { slug: 'jvm', name: 'JVM', area: 'jvm', desc: '内存结构、类加载、字节码与运行时。' },
+  { slug: 'gc', name: '垃圾回收', area: 'jvm', desc: '收集器选择、GC 日志、停顿与吞吐。' },
+  { slug: 'performance', name: '性能调优', area: 'jvm', desc: '压测、火焰图、瓶颈定位。' },
+  { slug: 'concurrency', name: '并发', area: 'concurrency', desc: '线程池、锁、AQS、内存模型。' },
+  { slug: 'virtual-threads', name: '虚拟线程', area: 'concurrency', desc: 'Loom、结构化并发与阻塞模型。' },
+  { slug: 'spring', name: 'Spring', area: 'spring', desc: 'IoC、AOP、自动配置与升级迁移。' },
+  { slug: 'transaction', name: '事务', area: 'spring', desc: '传播行为、失效场景与分布式事务。' },
+  { slug: 'mysql', name: 'MySQL', area: 'data', desc: '索引、执行计划、隔离级别与 MVCC。' },
+  { slug: 'redis', name: 'Redis', area: 'data', desc: '缓存、过期策略与一致性。' },
+  { slug: 'mq', name: '消息队列', area: 'data', desc: '投递语义、幂等与积压处理。' },
+  { slug: 'microservices', name: '微服务', area: 'architecture', desc: '拆分、治理、限流熔断与网关。' },
+  { slug: 'troubleshooting', name: '排查复盘', area: 'architecture', desc: '线上问题的定位过程与事后复盘。' },
+  { slug: 'testing', name: '测试', area: 'craft', desc: '单元测试、Mock 与边界用例。' },
+  { slug: 'toolchain', name: '构建与工具链', area: 'craft', desc: 'Maven、Gradle、CI 与本地开发效率。' },
+  { slug: 'career', name: '职业与判断', area: 'craft', desc: '技术选择、协作方式与长期成长。' },
 ];
 
 export const tagBySlug = (slug) => TAGS.find((t) => t.slug === slug);
-export const threadBySlug = (slug) => THREADS.find((t) => t.slug === slug);
-export const actByYear = (year) => ACTS.find((a) => a.year === year);
+export const areaBySlug = (slug) => AREAS.find((a) => a.slug === slug);
+export const tagsOfArea = (slug) => TAGS.filter((t) => t.area === slug);
