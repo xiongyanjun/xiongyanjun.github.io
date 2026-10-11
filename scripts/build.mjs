@@ -8,7 +8,6 @@ import {
   renderMarkdown,
   parseFrontMatter,
   escapeHtml,
-  estimateMinutes,
   stripMarkdown,
 } from './lib/markdown.mjs';
 import { SITE, AREAS, TAGS, tagBySlug, areaBySlug, tagsOfArea } from '../site.config.mjs';
@@ -68,7 +67,6 @@ function loadPosts() {
       html: rendered.html,
       headings: featured ? rendered.headings.filter((h) => h.level === 2 || h.level === 3) : [],
       text: stripMarkdown(body),
-      minutes: estimateMinutes(body),
     };
   });
   posts.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
@@ -180,7 +178,6 @@ const card = (p, rel = '') => `
   <div class="post-card-meta">
     <time datetime="${p.date}">${p.date}</time>
     ${p.area ? `<span class="sep">·</span><span>${escapeHtml(areaBySlug(p.area).name)}</span>` : ''}
-    ${p.featured ? `<span class="sep">·</span><span>${p.minutes} 分钟</span>` : ''}
   </div>
   <h3 class="post-card-title">${escapeHtml(p.title)}${draftBadge(p)}</h3>
   ${p.subtitle ? `<p class="post-card-sub">${escapeHtml(p.subtitle)}</p>` : ''}
@@ -216,7 +213,7 @@ function buildIndex() {
 <section class="hero">
   <p class="hero-eyebrow">Java 后端工程师的技术笔记</p>
   <h1 class="hero-title">${escapeHtml(SITE.tagline)}</h1>
-  <p class="hero-sub">JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能——写在这里的，都是排查过、踩过坑、后来才想明白的东西。</p>
+  <p class="hero-sub">技术回答「能不能做到」，哲学回答「值不值得做」——写代码的人，最后都站在这两者之间。</p>
   <div class="hero-actions">
     <a class="btn btn-primary" href="archive.html">浏览全部文章</a>
     <a class="btn btn-link" href="about.html">关于我 <span aria-hidden="true">›</span></a>
@@ -443,7 +440,6 @@ function buildPost(post) {
     ${post.subtitle ? `<p class="post-subtitle">${escapeHtml(post.subtitle)}</p>` : ''}
     <p class="post-meta">
       <time datetime="${post.date}">${fmtDate(post.date)}</time>
-      ${post.featured ? `<span class="sep">·</span>约 ${post.minutes} 分钟` : ''}
     </p>
   </header>
 
