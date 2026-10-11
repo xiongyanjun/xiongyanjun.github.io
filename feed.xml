@@ -8,6 +8,14 @@
   <atom:link href="https://xiongyanjun.github.io/feed.xml" rel="self" type="application/rss+xml" />
 
   <item>
+    <title>当写代码不再是瓶颈</title>
+    <link>https://xiongyanjun.github.io/posts/when-writing-code-stops-being-the-bottleneck.html</link>
+    <guid isPermaLink="true">https://xiongyanjun.github.io/posts/when-writing-code-stops-being-the-bottleneck.html</guid>
+    <pubDate>Sun, 11 Oct 2026 01:00:00 GMT</pubDate>
+    <category>工程与思辨</category>
+    <description>生成代码变快已经是事实，但个体的加速没有变成交付的加速。把三份公开研究和自己的体感放在一起看，瓶颈其实从"写"搬到了"验证与判断"。</description>
+  </item>
+  <item>
     <title>把技术栈当地图，而不是清单</title>
     <link>https://xiongyanjun.github.io/posts/tech-stack-as-a-map.html</link>
     <guid isPermaLink="true">https://xiongyanjun.github.io/posts/tech-stack-as-a-map.html</guid>
@@ -158,14 +166,6 @@
     <pubDate>Sun, 23 Feb 2025 01:00:00 GMT</pubDate>
     <category>运行时与性能</category>
     <description>服务每两天一次 Full GC，每次停顿一秒多。真正有用的线索不是“GC 很频繁”，而是“GC 之后老年代的水位还在涨”。</description>
-  </item>
-  <item>
-    <title>Spring Boot 自动配置的加载顺序与覆盖</title>
-    <link>https://xiongyanjun.github.io/posts/spring-boot-autoconfiguration-order.html</link>
-    <guid isPermaLink="true">https://xiongyanjun.github.io/posts/spring-boot-autoconfiguration-order.html</guid>
-    <pubDate>Sun, 19 Jan 2025 01:00:00 GMT</pubDate>
-    <category>框架与生态</category>
-    <description>我写的配置类没有生效，原因不是写错了，而是被另一个自动配置用 `@ConditionalOnMissingBean` 抢先了。</description>
   </item>
 </channel>
 </rss>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>当写代码不再是瓶颈 · 🐻‍❄️🦘🐎</title>
+<meta name="description" content="生成代码变快已经是事实，但个体的加速没有变成交付的加速。把三份公开研究和自己的体感放在一起看，瓶颈其实从"写"搬到了"验证与判断"。">
+<meta name="author" content="🐻‍❄️🦘🐎">
+<meta property="og:title" content="当写代码不再是瓶颈 · 🐻‍❄️🦘🐎">
+<meta property="og:description" content="生成代码变快已经是事实，但个体的加速没有变成交付的加速。把三份公开研究和自己的体感放在一起看，瓶颈其实从"写"搬到了"验证与判断"。">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/rss+xml" title="🐻‍❄️🦘🐎" href="../feed.xml">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>
+  try {
+    var t = localStorage.getItem('theme');
+    if (t) document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body class="page-post">
+
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="主导航">
+    <a class="nav-brand" href="../index.html" aria-label="🐻‍❄️🦘🐎 首页">🐻‍❄️🦘🐎</a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../archive.html">文章</a>
+      <a href="../areas.html">方向</a>
+      <a href="../about.html">关于</a>
+      <a href="../search.html">搜索</a>
+    </div>
+    <button class="theme-toggle" type="button" aria-label="切换深浅色外观" title="切换外观">
+      <span class="theme-toggle-icon"></span>
+    </button>
+  </nav>
+  <div class="reading-progress" aria-hidden="true"></div>
+</header>
+<main id="main">
+
+<article class="post">
+  <div class="post-inner">
+  <header class="post-head">
+    <div class="post-kicker">
+      <a class="badge badge-area" href="../area/craft.html">工程与思辨</a>
+      <a class="badge" href="../tag/code-agent.html">代码智能体</a><a class="badge" href="../tag/career.html">职业与判断</a>
+      
+    </div>
+    <h1 class="post-title">当写代码不再是瓶颈</h1>
+    <p class="post-subtitle">Code Agents, and the Bottleneck That Moves</p>
+    <p class="post-meta">
+      <time datetime="2026-10-11">2026 年 10 月 11 日</time>
+    </p>
+  </header>
+
+  <div class="post-layout">
+    <div class="post-body">
+      
+      <p>这半年我改掉了一个习惯：不再为一个难写的实现提前焦虑。</p>
+<p>以前拿到需求，我会先在脑子里把实现路径走一遍再动手，因为"写"是最贵的一步——贵到值得花半天想清楚。现在这个过程被压扁了：让 agent 先跑一版，我看结果，再判断方向对不对。</p>
+<p>省下来的时间没有变成空闲。它被搬到了另一个地方。而"搬到了哪"，过去两年有几份公开研究已经给出了相当清楚的线索。</p>
+<h2 id="先看加速它有多真就有多不确定"><a class="anchor" href="#先看加速它有多真就有多不确定" aria-hidden="true">#</a>先看加速：它有多真，就有多不确定</h2>
+<p><strong>GitHub 在 2022 年做的对照实验</strong>经常被引用：95 名职业开发者用 JavaScript 写同一个 HTTP 服务，用 Copilot 的一组比没用的一组快 <strong>55%</strong>。</p>
+<p>这个 55% 被传播得很广，但原文里还有一个同样重要的数字——它的 95% 置信区间是 <strong>[21%, 89%]</strong>。区间这么宽，说明"提速幅度"这件事的测量本身就很不稳定。而且实验任务是"写一个自己熟悉语言、但不熟悉的 HTTP 服务"，正好落在生成式工具最擅长的地带：样板清晰、边界明确、上下文自足。</p>
+<p><strong>METR 在 2025 年 7 月发布的随机对照实验</strong>给出了相反的结论。他们找了 16 位资深开源维护者——都在平均两万星、百万行级别的仓库上贡献多年——在各自熟悉的项目里处理 246 个真实 issue。结果：允许使用 AI 工具时，完成任务的时间<strong>多了 19%</strong>。</p>
+<p>更值得琢磨的是感知部分：这些开发者事先预计 AI 能带来 <strong>24% 的提速</strong>；在实际变慢之后，他们仍然认为自己<strong>快了 20%</strong>。</p>
+<p>这两份研究不矛盾，它们描述的是两类不同的工作：</p>
+<div class="table-wrap"><table><thead><tr><th>任务类型</th><th>大致结论</th></tr></thead><tbody><tr><td>陌生、自足、样板化的任务</td><td>明显加速</td></tr><tr><td>自己熟悉、上下文深、约束多的真实仓库</td><td>可能变慢</td></tr></tbody></table></div>
+<p>这也和我自己的体感一致。机械的活——跨文件改名、补齐测试、写胶水代码——加速非常明显；而在我最熟的模块里改一处关键逻辑，用 agent 反而更慢，因为光是把它需要知道的东西讲清楚，就已经超过我直接动手的时间。</p>
+<h2 id="瓶颈转移个体快了交付没变快"><a class="anchor" href="#瓶颈转移个体快了交付没变快" aria-hidden="true">#</a>瓶颈转移：个体快了，交付没变快</h2>
+<p>如果只看个体的感受，结论是乐观的。<strong>DORA 的 2024 年度报告</strong>发现，随着 AI 采纳度上升，个体生产力、心流体验和工作满意度都在改善。</p>
+<p>但同一份报告里还有另外半句：AI 采纳度上升的同时，<strong>交付吞吐量和交付稳定性在下降</strong>。</p>
+<p>这两句话放在一起，就是这几年最值得琢磨的现象：<strong>每个人都觉得自己变快了，但团队交付的东西没有变多，也没有变更稳。</strong></p>
+<p>原因不难找。把"写代码"拆开，它至少包含四件事：想清楚要做什么、决定怎么做、敲出来、确认做对了。当前工具对第三件事的改善是数量级的，对第四件事反而增加了负担。</p>
+<p>一个粗略的体感分布（不是精确统计，是我自己的观察）：</p>
+<div class="table-wrap"><table><thead><tr><th>阶段</th><th>以前</th><th>现在</th></tr></thead><tbody><tr><td>理解需求与定边界</td><td>30%</td><td>30%</td></tr><tr><td>编码</td><td>40%</td><td>15%</td></tr><tr><td>验证、评审、返工</td><td>30%</td><td>55%</td></tr></tbody></table></div>
+<p>前两行是加速，第三行是搬迁。<strong>凡是能被快速生成的代码，都会被快速生成；于是评审和验证成了唯一的闸门。</strong> 闸门不扩，压力就堆在闸门前。</p>
+<h2 id="痛点几乎全在差一点就对"><a class="anchor" href="#痛点几乎全在差一点就对" aria-hidden="true">#</a>痛点几乎全在"差一点就对"</h2>
+<p>Stack Overflow 2025 年的开发者调查里，关于 AI 的两个具体痛点排在前面：</p>
+<ul><li><strong>66%</strong> 的人选了"AI 给出的方案差一点就对，但不是完全对"；</li><li><strong>45%</strong> 的人选了"调试 AI 生成的代码比自己写更费时间"。</li></ul>
+<p>这两条其实是同一件事的两种说法。差一点就对的东西，需要人先读懂、再判断、然后修改——而这三步里最贵的是判断。它不像空指针那样会自己暴露，它会安静地跑上三个月。</p>
+<p>上个月我就遇到过一例。一个老模块要换新的返回结构，涉及 23 个调用点、4 个测试文件、2 处序列化兼容。agent 两小时做完了全部改动，其中有一处"顺手删掉了看起来多余的兼容代码"。那处代码确实看起来多余——它是为一个已经下线的外部系统保留的字段解析，而仓库里没有任何地方写着这件事。我把它留回来了。</p>
+<p><strong>上下文里没有的东西，工具不会替你想到。</strong> 这也是同一份调查里最耐人寻味的数据：46% 的开发者明确表示不信任 AI 输出的准确性，信任的只有 33%，而"高度信任"只有 3%。</p>
+<h2 id="人不愿意交出去的是责任"><a class="anchor" href="#人不愿意交出去的是责任" aria-hidden="true">#</a>人不愿意交出去的，是责任</h2>
+<p>还是那份调查，有两组数字我看了很久：</p>
+<ul><li><strong>76%</strong> 的人不打算让 AI 参与部署与监控；</li><li><strong>69%</strong> 的人不打算让它参与项目规划。</li></ul>
+<p>这不是保守。部署和监控是"出了事要有人担着"的环节，规划是"错了要有人负责"的环节。<strong>人真正不愿意交出去的，不是工作量，是责任。</strong></p>
+<p>这条界线很实用：划分自动化范围的时候，问一句"这一步出错，谁去解释"就够了。答不上来，就不该交出去。</p>
+<h2 id="被改变的是能力结构"><a class="anchor" href="#被改变的是能力结构" aria-hidden="true">#</a>被改变的是能力结构</h2>
+<p>几个我认为已经发生的变化：</p>
+<p><strong>能读懂比能写出来更值钱。</strong> 生成一段代码不难，难的是看一眼就知道哪里会在半年后出事。</p>
+<p><strong>提问的质量决定产出的质量。</strong> 上下文给得含糊，产出就是一段能跑但放错了地方的代码。这和带人是同一件事：你说不清要什么，对方就只能猜。</p>
+<p><strong>判断"这段代码不该存在"变得更重要。</strong> 生成成本低了，代码变多是默认结局。能让总量不失控的人，会比写得快的人更稀缺。</p>
+<h2 id="接下来会怎样"><a class="anchor" href="#接下来会怎样" aria-hidden="true">#</a>接下来会怎样</h2>
+<p>我不打算预测模型能力，那不是工程师能判断的。但有几件事可以从工程角度看清楚：</p>
+<p><strong>一、上下文会成为被维护的工程资产。</strong> 规范、约定、典型示例、模块说明——这些以前是"写了没人看"的文档，现在是 agent 的输入，它们的质量会直接变成产出质量。我们会开始像对待代码一样对待它们：有版本、有负责人、有评审。</p>
+<p><strong>二、能被验证的东西，才会被放心地自动化。</strong> 有测试、有类型、能回滚、能观测的部分，可以让它跑得很快；没有这些的部分，它跑得越快你越紧张。所以接下来受益最大的团队，未必是模型用得最猛的，而是验证基础设施最扎实的。</p>
+<p><strong>三、评审会成为主要的工作形态。</strong> 写的时间被压缩之后，剩下的时间大部分会花在阅读、质疑和决定上。这会带来一个尴尬的过渡期：大多数人对"写"的训练远多于对"评"的训练。</p>
+<p><strong>四、权限、审计和成本会变成日常工程问题。</strong> 谁能触发什么操作、留下了什么记录、一次任务花掉多少额度——这些以前只有大公司才关心的事，会成为每个团队的常规配置。</p>
+<p><strong>五、模型变强不会自动解决责任问题。</strong> 能力从 60 分涨到 90 分，减少的是错误的数量，不改变"错了谁来解释"这件事。这条界线会长期存在，而且只能由人来划。</p>
+<h2 id="一个不太舒服的问题"><a class="anchor" href="#一个不太舒服的问题" aria-hidden="true">#</a>一个不太舒服的问题</h2>
+<p>同一份调查里，52% 的开发者同意"AI 工具或智能体对生产力有正面影响"。把这个数字和 METR 那份"慢了 19%"的实验放在一起，最合理的解释是：<strong>人们说的"生产力"，衡量的是做事的感受，不完全是交付的结果。</strong></p>
+<p>于是有一种可能性值得提前想一想：如果加速省下来的时间，只是被用来接更多的需求，那这次效率提升的意义就只剩下交付量。</p>
+<p>我见过这样的循环：工具变快了，排期变紧了，人还是那么累，只是产出数字变大了。这种加速没有改善任何人的处境。</p>
+<p>真正值得期待的版本是另一种：<strong>用更少的时间把事做出来，再用腾出来的时间，把事情想得更清楚一点。</strong></p>
+<p>写代码从来不是目的，它只是我们确认自己想清楚了的方式之一。如果新工具能把这层确认做得更快，那是好事；如果它只是让确认变得更草率，就需要有人站出来说一句慢一点。</p>
+<hr>
+<p><strong>数据来源</strong></p>
+<ul><li>GitHub，<a href="https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/">量化 Copilot 对开发者生产力和满意度的影响</a>（95 名开发者对照实验，55%，置信区间 21%–89%）</li><li>METR，<a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/">早期 2025 年 AI 对资深开源开发者生产力的影响</a>（16 位维护者、246 个 issue，慢 19%）</li><li>DORA，<a href="https://dora.dev/research/2024/dora-report/">2024 年度报告</a>（个体生产力上升，交付吞吐与稳定性下降）</li><li>Stack Overflow，<a href="https://survey.stackoverflow.co/2025/ai">2025 开发者调查 · AI</a>（信任度、痛点与使用边界）</li></ul>
+    </div>
+    
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ul>
+      <li class="toc-l2"><a href="#先看加速它有多真就有多不确定">先看加速：它有多真，就有多不确定</a></li><li class="toc-l2"><a href="#瓶颈转移个体快了交付没变快">瓶颈转移：个体快了，交付没变快</a></li><li class="toc-l2"><a href="#痛点几乎全在差一点就对">痛点几乎全在"差一点就对"</a></li><li class="toc-l2"><a href="#人不愿意交出去的是责任">人不愿意交出去的，是责任</a></li><li class="toc-l2"><a href="#被改变的是能力结构">被改变的是能力结构</a></li><li class="toc-l2"><a href="#接下来会怎样">接下来会怎样</a></li><li class="toc-l2"><a href="#一个不太舒服的问题">一个不太舒服的问题</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  
+  <aside class="area-callout">
+    <p class="area-callout-label">所属方向</p>
+    <p class="area-callout-name">工程与思辨</p>
+    <p class="area-callout-desc">测试、构建、可观测性，以及一个工程师如何形成判断、如何追问“这件事值不值得做”。</p>
+    <a class="btn btn-link" href="../area/craft.html">看这个方向的全部文章 <span aria-hidden="true">›</span></a>
+  </aside>
+
+  <nav class="post-nav" aria-label="文章导航">
+    <a class="post-nav-item" href="../archive.html">
+      <span class="post-nav-label">回到文章列表</span>
+      <span class="post-nav-title">全部文章</span>
+    </a>
+    <a class="post-nav-item post-nav-next" href="tech-stack-as-a-map.html">
+      <span class="post-nav-label">更早的一篇</span>
+      <span class="post-nav-title">把技术栈当地图，而不是清单</span>
+    </a>
+  </nav>
+  </div>
+</article>
+
+
+<section class="section section-gray">
+  <div class="section-head"><h2>接着读</h2></div>
+  <div class="card-grid">
+<a class="card post-card" href="../posts/tech-stack-as-a-map.html">
+  <div class="post-card-meta">
+    <time datetime="2026-10-05">2026-10-05</time>
+    <span class="sep">·</span><span>工程与思辨</span>
+  </div>
+  <h3 class="post-card-title">把技术栈当地图，而不是清单</h3>
+  <p class="post-card-sub">A Map, Not a Checklist</p>
+  <p class="post-card-summary">清单让你知道该学什么，地图让你知道遇到问题时该往哪个方向找答案。真正救过场的从来不是清单，而是地图。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card" href="../posts/judgments-i-keep.html">
+  <div class="post-card-meta">
+    <time datetime="2026-09-27">2026-09-27</time>
+    <span class="sep">·</span><span>工程与思辨</span>
+  </div>
+  <h3 class="post-card-title">写了这些年代码，我保留的几个判断</h3>
+  <p class="post-card-sub">Judgments I Still Keep</p>
+  <p class="post-card-summary">大部分技术观点会被新版本、新框架推翻。但有五条判断用了这么多年还没被推翻，它们都不高级，每一条都是被具体的账教会的。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a>
+<a class="card post-card is-draft" href="../posts/from-tools-to-judgment.html">
+  <div class="post-card-meta">
+    <time datetime="2026-07-26">2026-07-26</time>
+    <span class="sep">·</span><span>工程与思辨</span>
+  </div>
+  <h3 class="post-card-title">从工具到判断：AI 时代 Java 工程师的价值<span class="badge">待写</span></h3>
+  <p class="post-card-sub">From Tools to Judgment</p>
+  <p class="post-card-summary">模型能写出能跑的代码，但跑起来之后呢？真正拉开差距的是选型、边界、取舍，以及“这件事该不该做”。</p>
+  <span class="post-card-more">阅读 <span aria-hidden="true">›</span></span>
+</a></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">🐻‍❄️🦘🐎</div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-col-title">浏览</p>
+        <a href="../index.html">首页</a><a href="../archive.html">文章</a><a href="../areas.html">方向</a><a href="../about.html">关于</a><a href="../search.html">搜索</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">方向</p>
+        <a href="../area/jvm.html">运行时与性能</a><a href="../area/concurrency.html">并发与多线程</a><a href="../area/spring.html">框架与生态</a><a href="../area/data.html">数据与中间件</a><a href="../area/architecture.html">分布式与架构</a><a href="../area/craft.html">工程与思辨</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">联系</p>
+        <a href="mailto:xiongyanjun97@qq.com">xiongyanjun97@qq.com</a>
+        <a href="../feed.xml">RSS 订阅</a>
+        <a href="../about.html">关于这个站</a>
+      </div>
+    </div>
+    <p class="footer-note">© 2026 🐻‍❄️🦘🐎 · 用 Markdown 写作，构建成静态页面</p>
+  </div>
+</footer>
+<script src="../assets/js/main.js" defer></script>
+</body>
+</html>

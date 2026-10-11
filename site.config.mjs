@@ -76,6 +76,7 @@ export const TAGS = [
   { slug: 'troubleshooting', name: '排查复盘', area: 'architecture', desc: '线上问题的定位过程与事后复盘。' },
   { slug: 'testing', name: '测试', area: 'craft', desc: '单元测试、Mock 与边界用例。' },
   { slug: 'toolchain', name: '构建与工具链', area: 'craft', desc: 'Maven、Gradle、CI 与本地开发效率。' },
+  { slug: 'code-agent', name: '代码智能体', area: 'craft', desc: '代码智能体带来的效率变化，以及它把成本转移到了哪里。' },
   { slug: 'career', name: '职业与判断', area: 'craft', desc: '技术选择、协作方式与长期成长。' },
 ];
 
