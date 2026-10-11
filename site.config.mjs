@@ -5,8 +5,8 @@ export const SITE = {
   name: '🐻‍❄️🦘🐎',
   author: '🐻‍❄️🦘🐎',
   email: 'xiongyanjun97@qq.com',
-  // 部署后改成你自己的地址（影响 RSS / sitemap / 绝对链接）
-  url: 'https://example.github.io',
+  // 部署地址（影响 RSS / sitemap / 绝对链接）
+  url: 'https://xiongyanjun.github.io',
   tagline: '把 Java 写清楚。',
   description:
     '一个 Java 后端工程师的技术笔记：JVM 与并发、Spring 生态、数据与中间件、分布式架构、工程效能与排查复盘。',
