@@ -215,6 +215,11 @@ html[data-theme="dark"] .theme-toggle-icon {
 .hero {
   padding: 68px 22px 48px;
   text-align: center;
+  /* 用 flex 列 + 居中对齐，确保每个子块本身也是居中的，
+     不依赖各自的自动外边距 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .hero > * {
@@ -236,6 +241,9 @@ html[data-theme="dark"] .theme-toggle-icon {
   line-height: 1.05;
   font-weight: 600;
   letter-spacing: -0.022em;
+  text-wrap: balance;
+  /* 结尾的中文句号在字框里靠左，纯几何居中会显得整体偏左，补半个字宽回来 */
+  text-indent: 0.25em;
 }
 
 .hero-sub {
@@ -244,6 +252,7 @@ html[data-theme="dark"] .theme-toggle-icon {
   line-height: 1.45;
   color: var(--ink-2);
   letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 
 .hero-actions {

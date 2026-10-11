@@ -213,7 +213,7 @@ function buildIndex() {
 <section class="hero">
   <p class="hero-eyebrow">哲学与计算机工程</p>
   <h1 class="hero-title">${escapeHtml(SITE.tagline)}</h1>
-  <p class="hero-sub">技术回答「能不能做到」，哲学回答「值不值得做」——写代码的人，最后都站在这两者之间。</p>
+  <p class="hero-sub">技术回答「能不能做到」，哲学回答「值不值得做」</p>
   <div class="hero-actions">
     <a class="btn btn-primary" href="archive.html">浏览全部文章</a>
     <a class="btn btn-link" href="about.html">关于我 <span aria-hidden="true">›</span></a>
