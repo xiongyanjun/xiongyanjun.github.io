@@ -1,10 +1,13 @@
-// 内部链接自检：确认 dist/ 里每个 href / src 都能找到对应文件。
+// 内部链接自检：确认构建产物里每个 href / src 都能找到对应文件。
 // 用法：node scripts/check-links.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// 构建产物分布在根目录和这几个子目录里，其余（源码、.git 等）不参与检查
+const GENERATED_DIRS = ['posts', 'area', 'tag'];
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -15,7 +18,13 @@ function walk(dir, out = []) {
   return out;
 }
 
-const files = walk(ROOT);
+const files = [
+  ...fs.readdirSync(ROOT).filter((f) => f.endsWith('.html')).map((f) => path.join(ROOT, f)),
+  ...GENERATED_DIRS.flatMap((d) => {
+    const dir = path.join(ROOT, d);
+    return fs.existsSync(dir) ? walk(dir) : [];
+  }),
+];
 const htmlFiles = files.filter((f) => f.endsWith('.html'));
 const problems = [];
 let checked = 0;

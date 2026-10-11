@@ -210,7 +210,6 @@ const areaCard = (a, rel = '') => `
 
 function buildIndex() {
   const latest = POSTS.slice(0, 3);
-  const [lead, ...rest] = latest;
   const written = POSTS.filter((p) => p.featured).length;
 
   const content = `
@@ -230,10 +229,7 @@ function buildIndex() {
     <h2>最新</h2>
     <a class="section-link" href="archive.html">全部文章 <span aria-hidden="true">›</span></a>
   </div>
-  <div class="lead-grid">
-    ${card(lead, '')}
-    <div class="lead-side">${rest.map((p) => card(p, '')).join('')}</div>
-  </div>
+  <div class="card-grid">${latest.map((p) => card(p, '')).join('')}</div>
 </section>
 
 <section class="section">
