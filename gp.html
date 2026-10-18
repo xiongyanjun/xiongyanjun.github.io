@@ -289,7 +289,7 @@
     <div class="row"><span class="dot c"></span><span>圆环撞上虚线的一瞬，点击屏幕任意位置</span></div>
     <div class="row"><span class="dot m"></span><span>珊瑚色圆环由内向外，同样在虚线处点击</span></div>
     <div class="row"><span class="dot g"></span><span>金色双环在虚线相遇，快速点两下</span></div>
-    <div class="row"><span class="dot r"></span><span>三次失误结束，只结算 50%；随时收手，多拿 10%</span></div>
+    <div class="row"><span class="dot r"></span><span>四次失误结束，只结算 60%；随时收手，多拿 10%</span></div>
   </div>
 
   <button class="btn-primary" id="btn-start" type="button">开始</button>
@@ -312,17 +312,17 @@
   var TAU = Math.PI * 2;
 
   var CFG = {
-    startBPM: 100,
-    maxBPM: 208,
-    bpmGainPerfect: 1.8,
-    bpmGainGood: 1.0,
-    bpmDropOnMiss: 7,
-    hearts: 3,
+    startBPM: 88,
+    maxBPM: 172,
+    bpmGainPerfect: 1.15,
+    bpmGainGood: 0.7,
+    bpmDropOnMiss: 10,
+    hearts: 4,
     multEvery: 4,
     multStep: 0.5,
     maxMult: 8,
     cashBonus: 1.10,
-    crashPenalty: 0.50,
+    crashPenalty: 0.60,
     grace: 1.55,
     leadIn: 1.4
   };
@@ -611,16 +611,16 @@
 
   /* ---------------- 节奏判定 ---------------- */
   function perfectWindow() {
-    return Math.max(0.042, Math.min(0.085, G.beatInterval * 0.30));
+    return Math.max(0.050, Math.min(0.098, G.beatInterval * 0.33));
   }
 
   function spawnRing(birth) {
     var n = G.beatCount++;
     var type = 'normal';
-    if (n >= 5) {
-      if (Math.random() < 0.16 && G.lastType !== 'reverse') {
+    if (n >= 8) {
+      if (Math.random() < 0.12 && G.lastType !== 'reverse') {
         type = 'reverse';
-      } else if (n >= 10 && Math.random() < 0.15 && G.bpm < 178 && G.lastType !== 'double') {
+      } else if (n >= 14 && Math.random() < 0.10 && G.bpm < 160 && G.lastType !== 'double') {
         type = 'double';
       }
     }
@@ -676,7 +676,7 @@
       addText('连击 ' + G.combo, cx, cy - targetR - 26, '#FFE066', 17, 1.0);
     }
 
-    if (perfect && G.perfectStreak > 0 && G.perfectStreak % 12 === 0 && G.hearts < CFG.hearts) {
+    if (perfect && G.perfectStreak > 0 && G.perfectStreak % 14 === 0 && G.hearts < CFG.hearts) {
       G.hearts++;
       updateHearts();
       addText('回血 +1', cx, cy - targetR - 52, '#7DFFB0', 18, 1.1);
@@ -726,14 +726,14 @@
     }
 
     var pW = perfectWindow();
-    var gW = pW * 1.9;
+    var gW = Math.min(pW * 2.05, G.beatInterval * 0.5);
 
     if (!bestR) {
       miss('空拍', x, y);
       return;
     }
 
-    var w = (bestR.type === 'double') ? gW * 1.55 : gW;
+    var w = (bestR.type === 'double') ? gW * 1.7 : gW;
 
     if (bestErr > w) {
       if (bestR.type === 'double' && bestR.taps === 1 && bestErr <= w * 2.0) {
@@ -762,11 +762,11 @@
 
   function checkMisses() {
     var pW = perfectWindow();
-    var gW = pW * 1.9;
+    var gW = Math.min(pW * 2.05, G.beatInterval * 0.5);
     for (var i = 0; i < G.rings.length; i++) {
       var r = G.rings[i];
       if (r.judged) continue;
-      var w = (r.type === 'double') ? gW * 1.55 : gW;
+      var w = (r.type === 'double') ? gW * 1.7 : gW;
       var hitAt = r.birth + r.dur * 0.5;
       if (G.t > hitAt + w) {
         r.judged = true;
@@ -1184,7 +1184,7 @@
     el.overScore.textContent = fmt(finalScore);
     el.overSub.textContent = cashed
       ? '本局 ' + fmt(raw) + ' · 收手奖励 +10%'
-      : '本局 ' + fmt(raw) + ' · 中断扣除 50%';
+      : '本局 ' + fmt(raw) + ' · 中断结算 60%';
     el.overStats.textContent = '最高连击 ' + G.bestCombo + '　命中 ' + G.hits + '　峰值 ' + Math.round(G.bpm) + ' BPM';
     el.overBest.innerHTML = isBest
       ? '<span class="new">新纪录</span>'
